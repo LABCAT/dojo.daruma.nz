@@ -1,0 +1,16 @@
+{
+  "name": "daruma-dojo",
+  "private": true,
+  "scripts": {
+    "dojo": "pnpm --filter multiplication-dojo start",
+    "dojo:android": "pnpm --filter multiplication-dojo android",
+    "dojo:ios": "pnpm --filter multiplication-dojo ios",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "turbo": "latest",
+    "typescript": "^5"
+  }
+}
