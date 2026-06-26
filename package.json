@@ -1,6 +1,11 @@
 {
   "name": "daruma-dojo",
   "private": true,
+  "packageManager": "pnpm@11.6.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "dojo": "pnpm --filter multiplication-dojo start",
     "dojo:android": "pnpm --filter multiplication-dojo android",
