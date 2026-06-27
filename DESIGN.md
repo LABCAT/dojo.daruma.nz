@@ -104,13 +104,75 @@ Progress within each difficulty level. Display weapon name + Japanese:
 
 Display preset name large, range small below in `text-muted`.
 
-## Animations
+## Animations — General
 
 - Correct answer: brief green flash on question container + scale up tick
 - Wrong answer: red flash + subtle shake animation
 - Rank unlock: full-screen dynamic theme burst, weapon reveals from centre
 - Screen transitions: fade or slide — never bounce/elastic (too playful)
 - Buttons/Keys: `active:scale-95` or background color shift for immediate tactile response
+
+## Visual Hierarchy — Challenge Screens
+
+The question is king. Nothing competes with it. Follow this sizing hierarchy:
+
+| Element | Minimum Size | Notes |
+|---------|-------------|-------|
+| Question numbers (a, b) | 72px+ (font-size) | The dominant element on screen — impossible to ignore |
+| Answer input display | 36–40px | Clear but secondary to question |
+| × operator symbol | 32–36px | Styled in rank color, not muted |
+| = ? | 24–28px | Text-muted, suggestive |
+| Question counter | 14px label, 18px number | Number in rank color, label in text-muted |
+| Score display (header) | 24–26px for count | Bold, rank-colored. Must be readable at a glance |
+| Header rank name | 14–15px | Truly centred (absolute overlay), tracked, uppercase, rank-colored |
+
+The answer display box must be compact — just enough to wrap the number.
+Do NOT make it a large card. `paddingVertical: 10–12px`, `minWidth: 140px`.
+
+### Rank Color Usage
+
+Each weapon rank within a difficulty theme has its own color defined in
+`difficultyThemes[preset].ranks[rankIndex]`. This rank-specific color **MUST**
+be used as the dominant accent throughout the challenge screen:
+
+- Submit button background
+- Progress bar fill
+- × operator symbol color
+- Question counter number
+- Score count in header
+- Header rank name
+- Slash animation color
+
+The base `theme.primary` should only appear in pressed/disabled fallback states.
+Never use a flat gold (#C9A84C) when a rank-specific color is available.
+
+## Advanced Styling & Layout Fixes
+
+### 3D Buttons & NativeWind Bugs
+NativeWind (v4/Tailwind) frequently strips or ignores dynamic inline styles on React Native `<Pressable>` components (e.g. `style={({ pressed }) => ({...})}`). 
+To build premium 3D buttons (like Submit):
+1. **Bypass NativeWind** for the styling: Wrap the inner content of the `Pressable` in a standard `<View>`. Apply all backgrounds, shadows, and dynamic borders directly to this inner `<View>`.
+2. **Always retain geometry**: Disabled states must NOT remove borders or shadows. A disabled button is just dim (`opacity: 0.35`), it is never flat. 
+3. **Bevels & Shadows**: Buttons must look premium. Use `borderTopWidth: 1.5` with a white semi-transparent color for a glass-morphic highlight, and `borderBottomWidth: 4` with a black semi-transparent color for a physical lip. Add a heavy glowing drop shadow (`shadowColor: rankColor`).
+
+### Optical Illusions in Layout
+When centring small text (like `= ?`) beneath massive text (like a `72px+` question), the massive text has invisible line-height padding below its baseline. If you use equal vertical margins on the `= ?`, it will look misaligned. You must use uneven margins (e.g., `marginTop: 4`, `marginBottom: 24`) to achieve *optical* vertical centring.
+
+## Animations — Combat Feel
+
+### Correct Answer: Sword Slash
+When a correct answer is submitted, a diagonal slash cuts across the question
+area — a thin white blade line (2px) with a wider rank-colored glow (10px)
+behind it. The slash scales outward from the centre (`scaleX` 0→1) at ~−28°,
+creating the impression of a blade cutting through. Duration: 200–300ms.
+Combined with a subtle scale pulse (1→1.1→1) on the answer display.
+
+### Wrong Answer: Shake
+The answer box shakes horizontally — 3 damped oscillations (±14→±10→±5→0px)
+over ~300ms. No slash. The red danger background provides the emotional weight.
+
+### Screen Transitions
+Fade only. Never bounce or elastic — too playful for this aesthetic.
 
 ## What NOT to Do
 

@@ -67,7 +67,7 @@ export function NumberPad({ value, onValueChange, disabled = false }: NumberPadP
   ]
 
   return (
-    <View className="w-full max-w-xs self-center px-4">
+    <View className="w-full max-w-xs self-center">
       {rows.map((row, rowIndex) => (
         <View key={rowIndex} className="flex-row w-full">
           {row.map((key) => (

@@ -6,6 +6,7 @@ export default function DojoLayout() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#0A0A0A' },
+        animation: 'fade',
       }}
     />
   )

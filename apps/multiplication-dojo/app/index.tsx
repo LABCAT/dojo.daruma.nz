@@ -135,6 +135,19 @@ export default function HomeScreen() {
               Practice
             </Text>
           </Pressable>
+
+          {/* TODO: TEMPORARY — remove after testing challenge screen */}
+          <Pressable
+            onPress={() => router.push('/(dojo)/challenge?preset=ashigaru&rankId=1')}
+            className="border rounded-lg py-5 items-center justify-center"
+            style={{ borderColor: '#E53535', borderStyle: 'dashed' }}
+          >
+            <Text className="font-bold text-lg tracking-widest uppercase" style={{ color: '#E53535' }}>
+              Test Challenge
+            </Text>
+          </Pressable>
+
+
         </View>
 
       </View>

@@ -511,6 +511,54 @@ mark — swift, clean, satisfying. When wrong — a moment of stillness before
 the next question. The fail state should feel sombre, not punishing — a sensei
 showing you how far you fell short, with a path back.
 
+### Visual Requirements — Non-negotiable
+
+These are hard requirements, not guidelines:
+
+- **Question numbers**: `fontSize: 80+`. These dominate the screen.
+- **× symbol**: `fontSize: 36+`, colored with `rankColor` — not muted grey.
+- **= ?**: `fontSize: 28`, `text-muted` color.
+- **Question counter**: "Question X of 20" — the number X must be `fontSize: 18` in `rankColor`, surrounding text `fontSize: 14` in `text-muted`.
+- **Header score**: `fontSize: 24–26` for the correct count, `fontWeight: '900'`, colored with `rankColor`. The `/totalQuestions` is `fontSize: 14–15` in `text-muted`.
+- **Header rank name**: Must be **truly centred** using `position: 'absolute'` overlay (left: 0, right: 0, top: 0, bottom: 0). Back arrow and score sit on top via `zIndex: 1`.
+- **Answer box**: Compact. `paddingVertical: 10–12`, `minWidth: 140`. NOT a large card.
+- **Submit button**: MUST be a 3D physical-looking button. Background color = `rankColor`. 
+  - **CRITICAL NativeWind Bug**: NativeWind strips inline styles on `<Pressable>`. You MUST wrap the inner content in a `<View>` and apply all borders/shadows/background to that inner `<View>`.
+  - **Geometry**: `width: 220`, `borderRadius: 16`. `borderBottomWidth: 4` for a lip, `borderTopWidth: 1.5` for a white highlight, and a glowing drop shadow (`elevation: 6`).
+  - **Disabled State**: Do NOT remove the borders or shadows when disabled. Simply drop `opacity: 0.35`. It must ALWAYS look like a 3D button.
+- **Progress bar**: Fill color = `rankColor`.
+
+### Rank Color Rule
+
+Each rank has its own color from `getDifficultyTheme(preset).ranks[rankId - 1]`.
+This color MUST be used for every accent on screen: submit button, progress bar,
+× symbol, score, question counter number, header rank name, and slash animation.
+Do NOT use `theme.primary` or hardcoded gold as the main accent.
+
+### Sword Slash Animation (Correct Answer)
+
+On correct answer, play a diagonal sword slash across the question area:
+- Two overlapping `Animated.View` elements positioned absolutely in the question area
+- **Core blade**: 2px height, white (`#FFFFFF`), rotated −28°
+- **Glow trail**: 10px height, `rankColor`, opacity 0.4, same rotation
+- Animation: `scaleX` from 0→1 (scales from centre outward) over 220ms with `Easing.out(Easing.cubic)`
+- Fade in over 100ms, hold 60ms, fade out over 250ms
+- Combined with a scale pulse (1→1.1→1) on the answer box
+- Use `useNativeDriver: true` for all transform/opacity animations
+
+### Shake Animation (Wrong Answer)
+
+On wrong answer, shake the answer box horizontally:
+- 6-step `Animated.sequence`: ±14, ±10, ±5, 0 (50ms per step = 300ms total)
+- `useNativeDriver: true` with `translateX`
+- Wrap answer box in `Animated.View` with `transform: [{ translateX: shakeAnim }]`
+
+### Test Link (temporary)
+
+Before testing, add a temporary button to `app/index.tsx` that navigates to
+`/(dojo)/challenge?preset=ashigaru&rankId=1`. Style it with a red dashed border
+so it's obviously temporary. Remove it after verification.
+
 ### Verification — full game loop on device
 Add a temporary direct link on Home screen to: `/(dojo)/challenge?preset=ashigaru&rankId=1`
 Test every step then remove the link:
@@ -530,6 +578,14 @@ Test every step then remove the link:
 - [ ] Hardware back button does nothing during active challenge
 - [ ] Back arrow is muted during active challenge
 - [ ] `pnpm typecheck` — zero errors
+- [ ] Question numbers are large (80px+) and dominate the screen
+- [ ] × symbol is colored with rank color, not grey
+- [ ] Score in header is large and readable at a glance
+- [ ] Rank name is truly centred in header
+- [ ] Correct answer triggers visible sword slash animation
+- [ ] Wrong answer triggers horizontal shake on answer box
+- [ ] Submit button uses rank-specific color (not base gold)
+- [ ] All accents use rank color from theme, not hardcoded gold
 
 ### Commit
 ```
