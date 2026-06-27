@@ -29,3 +29,15 @@ export const difficultyPresets = [
 
 export type DifficultyId = typeof difficultyPresets[number]['id']
 export type WeaponRankId = typeof weaponRanks[number]['id']
+
+// ─── Named aliases used by app screens ───────────────────────────────────────
+
+/** Aliased type used in Home screen imports */
+export type PresetId = DifficultyId
+
+/** Array of difficulty presets (alias — iterate to build UI) */
+export const PRESETS = difficultyPresets
+
+/** Array of weapon ranks (alias — iterate to build rank UI) */
+export const RANKS = weaponRanks
+
