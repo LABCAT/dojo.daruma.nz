@@ -1,4 +1,4 @@
-﻿# Daruma Dojo â€” Monorepo Agent Rules
+# Daruma Dojo â€” Monorepo Agent Rules
 
 Pnpm + Turborepo monorepo for **Daruma Dojo** â€” Japanese-themed micro learning
 apps and games by Daruma NZ (daruma.nz). Solo developer (Shane), Windows,
@@ -46,6 +46,7 @@ pnpm typecheck                                 # turbo typecheck all
 - Never override React Native or React versions manually
 - Never use `expo-cli` â€” use `npx expo` instead
 - Bundle IDs: `nz.daruma.dojo.<appname>` (e.g. `nz.daruma.dojo.multiplicationdojo`)
+- Always aim to use the latest versions of all tech
 
 ## Adding a New App
 
