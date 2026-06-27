@@ -772,8 +772,10 @@ Build Practice Mode — infinite questions, no pressure, no rank at stake.
 Just a player and their multiplication tables. This screen serves both the
 nervous beginner warming up and the adult grinding mental math before bed.
 
-### Read First
+### Read First & Deep Research
 Read `AGENTS.md` and `DESIGN.md` before starting.
+**CRITICAL AI INSTRUCTION:** Do not write code blindly. Deeply research the `usePractice` hook and `challenge.tsx` to ensure you understand how auto-advancing works. 
+**ROUTER SAFETY:** Never use `router.replace()` or `<Link replace>` to navigate back to the root of the current stack. The `replace` action unmounts the `NavigationContainer` and causes severe crashes. ALWAYS use `router.navigate('/(path)')` which safely pops the screens off the stack.
 
 ### Prerequisites
 - Prompt 08 complete and verified on device
@@ -848,8 +850,10 @@ Add kinetic feedback to the challenge and practice screens. Right now the colour
 change is instantaneous — make it feel alive. A correct answer should sing.
 A wrong answer should sting.
 
-### Read First
+### Read First & Deep Research
 Read `AGENTS.md` and `DESIGN.md` before starting.
+**CRITICAL AI INSTRUCTION:** Thoroughly research the existing `challenge.tsx` and `index.tsx` files. Understand the exact mounting and state lifecycle before injecting animations. Do NOT guess the timing.
+**ROUTER SAFETY:** Never use `router.replace()` to navigate back to the root of the current stack. The `replace` action unmounts the `NavigationContainer` and causes severe crashes. ALWAYS use `router.navigate('/(path)')` which safely pops the screens off the stack.
 
 ### Prerequisites
 - Prompt 09 complete and verified on device
@@ -936,8 +940,9 @@ feat: correct/wrong answer animations on challenge and practice screens
 Close the gap between "it works" and "it's ready to ship." These are the
 details that separate a professional product from a prototype.
 
-### Read First
+### Read First & Deep Research
 Read `AGENTS.md` before starting.
+**CRITICAL AI INSTRUCTION:** This is the final polish. Before writing a line of code, execute a deep audit of the codebase to identify any fragile `router.replace()` calls navigating back to stack roots, and replace them with `router.navigate()`. We must not ship with `NavigationContainer` crash risks.
 
 ### Prerequisites
 - Prompt 10 complete and verified on device

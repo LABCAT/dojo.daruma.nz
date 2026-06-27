@@ -89,9 +89,10 @@ Progress within each difficulty level. Display weapon name + Japanese:
 | 4    | Katana    | 刀       | Curved long blade  |
 | 5    | Nodachi   | 野太刀   | Great sword        |
 
-- Locked ranks: `opacity-40`, greyscale
-- Current rank: dynamic theme border `border-[theme.primary]`, full colour
-- Completed ranks: dynamic theme checkmark overlay
+- Each rank MUST use its own sub-theme color from `theme.ranks[rankIndex]` to create a visual progression.
+- Locked ranks: visible but dimmed (e.g. `opacity-70`), clearly showing the requirements so the player is motivated. Do NOT use greyscale.
+- Current rank: vibrant glowing borders using the rank's specific color, slightly tinted background.
+- Completed ranks: rank color checkmark, prominent but less visually demanding than the current rank.
 
 ## Difficulty Presets
 
