@@ -1,10 +1,10 @@
-import { createMMKV } from 'react-native-mmkv'
+import { MMKV } from 'react-native-mmkv'
 import { PresetId } from '../theme/tokens'
 
 export type RankId = 1 | 2 | 3 | 4 | 5
 export type RankStatus = 'locked' | 'current' | 'complete'
 
-export const storage = createMMKV({
+export const storage = new MMKV({
   id: 'daruma-dojo'
 })
 
@@ -61,7 +61,7 @@ export function advanceRank(preset: PresetId, completedRankId: RankId): RankId |
 
 export function resetProgress(preset: PresetId): void {
   for (let i = 1; i <= 5; i++) {
-    storage.remove(`rank:${preset}:${i}`)
+    storage.delete(`rank:${preset}:${i}`)
   }
 }
 

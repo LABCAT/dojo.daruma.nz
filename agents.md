@@ -46,7 +46,7 @@ pnpm typecheck                                 # turbo typecheck all
 - Never override React Native or React versions manually
 - Never use `expo-cli` â€” use `npx expo` instead
 - Bundle IDs: `nz.daruma.dojo.<appname>` (e.g. `nz.daruma.dojo.multiplicationdojo`)
-- Always aim to use the latest versions of all tech
+- Always aim to use the latest versions of all tech that is compatible with Expo Go
 
 ## Adding a New App
 
