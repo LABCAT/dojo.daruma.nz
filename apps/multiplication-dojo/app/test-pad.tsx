@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { View } from 'react-native'
-import { Text, NumberPad, Button } from '@daruma/ui'
+import { SafeAreaView, View } from 'react-native'
+import { NumberPad, Text, Button } from '@daruma/ui'
 
-export default function PracticeIndex() {
+export default function TestPadScreen() {
   const [value, setValue] = useState('')
   const [disabled, setDisabled] = useState(false)
 
@@ -11,9 +10,6 @@ export default function PracticeIndex() {
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 px-4 py-6 justify-between">
         <View className="items-center justify-center flex-1">
-          <Text variant="heading" className="mb-8">
-            Test Pad
-          </Text>
           <Text className="text-6xl font-bold text-text text-center tracking-widest">
             {value || '0'}
           </Text>
