@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter, Link } from 'expo-router'
 import {
   useChallenge,
   NumberPad,
@@ -53,13 +53,14 @@ function validateRankId(raw: string | string[] | undefined): RankId {
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export default function ChallengeScreen() {
+  console.log('🔵 [Challenge] RENDER')
   const params = useLocalSearchParams<{ preset: string; rankId: string }>()
   const router = useRouter()
 
   const safePreset = validatePreset(params.preset)
   const safeRankId = validateRankId(params.rankId)
 
-  const challenge = useChallenge(safePreset)
+  const challenge = useChallenge(safePreset, safeRankId)
   const [input, setInput] = useState('')
 
   const theme = getDifficultyTheme(safePreset)
@@ -73,6 +74,14 @@ export default function ChallengeScreen() {
   const shakeAnim = useRef(new Animated.Value(0)).current
   const answerPulse = useRef(new Animated.Value(1)).current
 
+  // ── Track mount/unmount ─────────────────────────────────────────────────
+  useEffect(() => {
+    console.log('🔵 [Challenge] MOUNTED')
+    return () => {
+      console.log('🔵🔵🔵 [Challenge] UNMOUNTED')
+    }
+  }, [])
+
   // ── Start challenge on mount ───────────────────────────────────────────
   useEffect(() => {
     challenge.start()
@@ -81,14 +90,25 @@ export default function ChallengeScreen() {
 
   // ── Navigate on pass ───────────────────────────────────────────────────
   useEffect(() => {
+    console.log('🔵 [Challenge] status changed to:', challenge.status)
     if (challenge.status === 'passed') {
-      router.replace({
-        pathname: '/(dojo)/rank-unlock',
-        params: {
-          preset: safePreset,
-          completedRankId: String(safeRankId),
-        },
-      })
+      console.log('🔵 [Challenge] PASSED — scheduling navigation to rank-unlock in 400ms')
+      const timer = setTimeout(() => {
+        try {
+          console.log('🔵 [Challenge] calling router.push to rank-unlock')
+          router.push({
+            pathname: '/(dojo)/rank-unlock',
+            params: {
+              preset: safePreset,
+              completedRankId: String(safeRankId),
+            },
+          })
+          console.log('🔵 [Challenge] router.push returned successfully')
+        } catch (e) {
+          console.log('🔵🔥 [Challenge] router.push THREW:', e)
+        }
+      }, 400)
+      return () => clearTimeout(timer)
     }
   }, [challenge.status, router, safePreset, safeRankId])
 
@@ -225,8 +245,14 @@ export default function ChallengeScreen() {
   }, [input, isWaiting, challenge])
 
   const handleBack = useCallback(() => {
+    console.log('🔵 [Challenge] handleBack called, isActive:', isActive)
     if (isActive) return
-    router.back()
+    try {
+      router.back()
+      console.log('🔵 [Challenge] router.back() returned successfully')
+    } catch (e) {
+      console.log('🔵🔥 [Challenge] router.back() THREW:', e)
+    }
   }, [isActive, router])
 
   const handleRetry = useCallback(() => {
@@ -256,122 +282,83 @@ export default function ChallengeScreen() {
   // ═══════════════════════════════════════════════════════════════════════
   if (challenge.status === 'failed') {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: 16,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text
-            style={{
-              color: '#8A8580',
-              fontSize: 12,
-              letterSpacing: 4,
-              textTransform: 'uppercase',
-              marginBottom: 20,
-            }}
-          >
-            Final Result
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+        {/* Dark Red glow effect */}
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }} pointerEvents="none">
+          <View style={{ position: 'absolute', top: -50, left: -50, width: 300, height: 300, borderRadius: 150, backgroundColor: '#8B1A1A', opacity: 0.15 }} />
+          <View style={{ position: 'absolute', bottom: -50, right: -50, width: 200, height: 200, borderRadius: 100, backgroundColor: '#E53535', opacity: 0.1 }} />
+        </View>
+
+        <View style={{ flex: 1, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#E53535', fontSize: 24, fontWeight: '900', letterSpacing: 8, textTransform: 'uppercase', marginBottom: 24 }}>
+            UNSUCCESSFUL
           </Text>
 
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'baseline',
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{ fontSize: 84, fontWeight: '900', color: rankColor }}
-            >
-              {challenge.correctCount}
-            </Text>
-            <Text
-              style={{
-                fontSize: 32,
-                color: '#8A8580',
-                fontWeight: '300',
-                marginLeft: 4,
-              }}
-            >
-              / {challenge.totalQuestions}
+          <View style={{ alignItems: 'center', marginBottom: 40 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 12 }}>
+              <Text style={{ fontSize: 84, fontWeight: '900', color: '#F0EDE8' }}>
+                {challenge.correctCount}
+              </Text>
+              <Text style={{ fontSize: 32, color: '#8A8580', fontWeight: '300', marginLeft: 4 }}>
+                / {challenge.totalQuestions}
+              </Text>
+            </View>
+
+            <View style={{ width: 64, height: 2, backgroundColor: '#8B1A1A', marginBottom: 24 }} />
+
+            <Text style={{ fontSize: 16, color: '#8A8580', textAlign: 'center', lineHeight: 26 }}>
+              You needed <Text style={{ color: '#F0EDE8', fontWeight: '700' }}>{challenge.passThreshold}</Text> to advance.
             </Text>
           </View>
 
-          <View
-            style={{
-              width: 48,
-              height: 2,
-              backgroundColor: rankColor,
-              marginBottom: 28,
-              opacity: 0.4,
-            }}
-          />
-
-          <Text
-            style={{
-              fontSize: 16,
-              color: '#8A8580',
-              textAlign: 'center',
-              lineHeight: 26,
-              marginBottom: 56,
-            }}
-          >
-            You need{' '}
-            <Text style={{ color: '#F0EDE8', fontWeight: '700' }}>17</Text>
-            {' '}to advance
-          </Text>
-
-          <View style={{ width: '100%', maxWidth: 320, gap: 12 }}>
-            <Pressable
-              onPress={handleRetry}
-              style={({ pressed }) => ({
-                borderRadius: 12,
-                paddingVertical: 18,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: pressed ? theme.primaryDim : rankColor,
-              })}
-            >
-              <Text
-                style={{
-                  color: '#0A0A0A',
-                  fontWeight: '800',
-                  fontSize: 15,
-                  letterSpacing: 3,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Try Again
-              </Text>
+          <View style={{ width: '100%', maxWidth: 320, gap: 16, alignItems: 'center' }}>
+            <Pressable onPress={handleRetry}>
+              {({ pressed }) => (
+                <View style={{
+                  width: 260,
+                  paddingVertical: 18,
+                  borderRadius: 16,
+                  alignItems: 'center',
+                  backgroundColor: '#8B1A1A',
+                  opacity: pressed ? 0.9 : 1,
+                  borderTopWidth: 1.5,
+                  borderTopColor: 'rgba(255,255,255,0.2)',
+                  borderBottomWidth: pressed ? 0 : 4,
+                  borderBottomColor: 'rgba(0,0,0,0.4)',
+                  transform: [{ translateY: pressed ? 4 : 0 }]
+                }}>
+                  <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 16, letterSpacing: 3, textTransform: 'uppercase' }}>
+                    Try Again
+                  </Text>
+                </View>
+              )}
             </Pressable>
 
-            <Pressable
-              onPress={() => router.back()}
-              style={({ pressed }) => ({
-                borderRadius: 12,
-                paddingVertical: 18,
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 1,
-                borderColor: '#2A2A2A',
-                backgroundColor: pressed ? '#1A1A1A' : 'transparent',
-              })}
-            >
-              <Text
-                style={{
-                  color: '#F0EDE8',
-                  fontWeight: '800',
-                  fontSize: 15,
-                  letterSpacing: 3,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Back to Dojo
-              </Text>
+            <Pressable onPress={() => {
+              console.log('🔵 [Challenge] Back to Dojo PRESSED')
+              try {
+                console.log('🔵 [Challenge] calling router.dismissAll() — stack should be [index, challenge]')
+                router.dismissAll()
+                console.log('🔵 [Challenge] dismissAll returned successfully')
+              } catch (e) {
+                console.log('🔵🔥 [Challenge] dismissAll THREW:', e)
+              }
+            }}>
+              {({ pressed }) => (
+                <View style={{
+                  width: 260,
+                  paddingVertical: 18,
+                  borderRadius: 16,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#141414' : 'transparent',
+                  borderWidth: 1,
+                  borderColor: '#2A2A2A',
+                }}>
+                  <Text style={{ color: '#F0EDE8', fontWeight: '800', fontSize: 15, letterSpacing: 3, textTransform: 'uppercase' }}>
+                    Back to Dojo
+                  </Text>
+                </View>
+              )}
             </Pressable>
           </View>
         </View>

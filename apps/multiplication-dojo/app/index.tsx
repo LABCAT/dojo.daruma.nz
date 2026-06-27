@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter, useFocusEffect } from 'expo-router'
@@ -22,12 +22,21 @@ function getCurrentRank(preset: PresetId) {
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
+  console.log('⚪ [HomeScreen] RENDER')
   const router = useRouter()
   const [activePreset, setActivePreset] = useState<PresetId>(() => getActiveDifficulty())
   const [currentRank, setCurrentRank] = useState(() => getCurrentRank(getActiveDifficulty()))
 
+  useEffect(() => {
+    console.log('⚪ [HomeScreen] MOUNTED')
+    return () => {
+      console.log('⚪⚪⚪ [HomeScreen] UNMOUNTED')
+    }
+  }, [])
+
   useFocusEffect(
     useCallback(() => {
+      console.log('⚪ [HomeScreen] useFocusEffect FIRED')
       const preset = getActiveDifficulty()
       setActivePreset(preset)
       setCurrentRank(getCurrentRank(preset))

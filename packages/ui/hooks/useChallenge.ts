@@ -15,6 +15,7 @@ export interface UseChallengeReturn {
   questionIndex: number;
   totalQuestions: number;
   correctCount: number;
+  passThreshold: number;
   lastAnswerCorrect: boolean | null;
   start: () => void;
   submitAnswer: (value: string) => void;
@@ -22,7 +23,6 @@ export interface UseChallengeReturn {
 }
 
 const TOTAL_QUESTIONS = 20;
-const PASS_THRESHOLD = 17;
 
 interface ChallengeState {
   status: ChallengeStatus;
@@ -31,10 +31,11 @@ interface ChallengeState {
   correctCount: number;
   lastAnswerCorrect: boolean | null;
   usedPairs: Set<string>;
+  passThreshold: number;
 }
 
 type Action =
-  | { type: 'START'; preset: PresetId }
+  | { type: 'START'; preset: PresetId; passThreshold: number }
   | { type: 'SUBMIT_ANSWER'; isCorrect: boolean }
   | { type: 'NEXT_QUESTION'; preset: PresetId };
 
@@ -63,6 +64,7 @@ const initialState: ChallengeState = {
   correctCount: 0,
   lastAnswerCorrect: null,
   usedPairs: new Set<string>(),
+  passThreshold: 17,
 };
 
 function challengeReducer(state: ChallengeState, action: Action): ChallengeState {
@@ -78,6 +80,7 @@ function challengeReducer(state: ChallengeState, action: Action): ChallengeState
         correctCount: 0,
         lastAnswerCorrect: null,
         usedPairs,
+        passThreshold: action.passThreshold,
       };
     }
     case 'SUBMIT_ANSWER': {
@@ -89,7 +92,7 @@ function challengeReducer(state: ChallengeState, action: Action): ChallengeState
     }
     case 'NEXT_QUESTION': {
       if (state.questionIndex >= TOTAL_QUESTIONS - 1) {
-        const passed = state.correctCount >= PASS_THRESHOLD;
+        const passed = state.correctCount >= state.passThreshold;
         return {
           ...state,
           status: passed ? 'passed' : 'failed',
@@ -114,9 +117,18 @@ function challengeReducer(state: ChallengeState, action: Action): ChallengeState
   }
 }
 
-export function useChallenge(preset: PresetId): UseChallengeReturn {
+export function useChallenge(preset: PresetId, rankId: number = 1): UseChallengeReturn {
   const [state, dispatch] = useReducer(challengeReducer, initialState);
   
+  // Calculate dynamic threshold based on rank
+  // Rank 1: 14, Rank 2: 16, Rank 3: 18, Rank 4: 19, Rank 5: 20
+  let calculatedThreshold = 17;
+  if (rankId === 1) calculatedThreshold = 14;
+  else if (rankId === 2) calculatedThreshold = 16;
+  else if (rankId === 3) calculatedThreshold = 18;
+  else if (rankId === 4) calculatedThreshold = 19;
+  else if (rankId === 5) calculatedThreshold = 20;
+
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const clearAdvanceTimeout = useCallback(() => {
@@ -128,13 +140,13 @@ export function useChallenge(preset: PresetId): UseChallengeReturn {
   
   const start = useCallback(() => {
     clearAdvanceTimeout();
-    dispatch({ type: 'START', preset });
-  }, [preset, clearAdvanceTimeout]);
+    dispatch({ type: 'START', preset, passThreshold: calculatedThreshold });
+  }, [preset, calculatedThreshold, clearAdvanceTimeout]);
   
   const retry = useCallback(() => {
     clearAdvanceTimeout();
-    dispatch({ type: 'START', preset });
-  }, [preset, clearAdvanceTimeout]);
+    dispatch({ type: 'START', preset, passThreshold: calculatedThreshold });
+  }, [preset, calculatedThreshold, clearAdvanceTimeout]);
 
   const submitAnswer = useCallback((value: string) => {
     if (state.status !== 'active') return;
@@ -163,6 +175,7 @@ export function useChallenge(preset: PresetId): UseChallengeReturn {
     questionIndex: state.questionIndex,
     totalQuestions: TOTAL_QUESTIONS,
     correctCount: state.correctCount,
+    passThreshold: state.passThreshold,
     lastAnswerCorrect: state.lastAnswerCorrect,
     start,
     submitAnswer,

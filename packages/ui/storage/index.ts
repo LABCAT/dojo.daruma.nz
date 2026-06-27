@@ -62,14 +62,18 @@ export function getAllRankStatuses(preset: PresetId): Record<RankId, RankStatus>
 }
 
 export function advanceRank(preset: PresetId, completedRankId: RankId): RankId | null {
+  console.log('💾 [advanceRank] START — preset:', preset, 'completedRankId:', completedRankId)
   setRankStatus(preset, completedRankId, 'complete')
+  console.log('💾 [advanceRank] set rank', completedRankId, 'to complete')
   
   if (completedRankId === 5) {
+    console.log('💾 [advanceRank] rank 5 completed — mastered, returning null')
     return null
   }
   
   const nextRankId = (completedRankId + 1) as RankId
   setRankStatus(preset, nextRankId, 'current')
+  console.log('💾 [advanceRank] set rank', nextRankId, 'to current — returning', nextRankId)
   
   return nextRankId
 }
