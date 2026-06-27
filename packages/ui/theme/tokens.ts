@@ -18,35 +18,74 @@ export const difficultyThemes = {
     name: 'Ashigaru',
     primary: '#B87333', // Copper / Bronze base
     primaryDim: '#8B5A2B',
-    ranks: ['#CD7F32', '#D2691E', '#B8860B', '#DAA520', '#FF8C00'], // Progressive shades
+    // Wood -> Slate/Iron -> Bronze -> Silver -> Gold
+    ranks: ['#8B5A2B', '#708090', '#CD7F32', '#C0C0C0', '#FFD700'], 
   },
   samurai: {
     name: 'Samurai',
     primary: '#4682B4', // Steel Blue base
     primaryDim: '#315C80',
-    ranks: ['#5F9EA0', '#4682B4', '#4169E1', '#0000CD', '#000080'], // Progressive shades
+    // Cadet Blue -> Dodger Blue -> Spring Green -> Purple -> Pink
+    ranks: ['#5F9EA0', '#1E90FF', '#00FA9A', '#9370DB', '#FF1493'], 
   },
   ronin: {
     name: 'Ronin',
     primary: '#DC143C', // Crimson / Red base
     primaryDim: '#8B0000',
-    ranks: ['#CD5C5C', '#DC143C', '#B22222', '#8B0000', '#800000'], // Progressive shades
+    // Indian Red -> Dark Orange -> Gold -> Crimson -> Blood Red
+    ranks: ['#CD5C5C', '#FF8C00', '#FFD700', '#DC143C', '#8B0000'], 
   },
   shogun: {
     name: 'Shogun',
     primary: '#9370DB', // Purple / Gold base
     primaryDim: '#4B0082',
-    ranks: ['#9370DB', '#8A2BE2', '#9932CC', '#800080', '#4B0082'], // Progressive shades
+    // Blue Violet -> Cyan Lightning -> Magenta -> Orange Red -> Pure White Mastery
+    ranks: ['#8A2BE2', '#00FFFF', '#FF00FF', '#FF4500', '#FFFFFF'], 
   },
 } as const
 
 // Mapping rank IDs to specific lucide-react-native icons
 export const weaponRanks = [
-  { id: 1, name: 'Bokken', icon: 'Flame', description: 'Wooden sword' },
-  { id: 2, name: 'Tanto', icon: 'Shield', description: 'Dagger' },
-  { id: 3, name: 'Wakizashi', icon: 'Sword', description: 'Short sword' },
-  { id: 4, name: 'Katana', icon: 'Swords', description: 'Sword' },
-  { id: 5, name: 'Nodachi', icon: 'Crown', description: 'Great sword' },
+  { 
+    id: 1, 
+    name: 'Bokken', 
+    icon: 'Flame', 
+    description: 'Wooden sword',
+    testDescription: 'Foundational challenge with mixed difficulty.',
+    passRequirement: 'Score 14/20 to advance'
+  },
+  { 
+    id: 2, 
+    name: 'Tanto', 
+    icon: 'Shield', 
+    description: 'Dagger',
+    testDescription: 'Increased difficulty with fewer easy questions.',
+    passRequirement: 'Score 16/20 to advance'
+  },
+  { 
+    id: 3, 
+    name: 'Wakizashi', 
+    icon: 'Sword', 
+    description: 'Short sword',
+    testDescription: 'Moderate difficulty focus.',
+    passRequirement: 'Score 18/20 to advance'
+  },
+  { 
+    id: 4, 
+    name: 'Katana', 
+    icon: 'Swords', 
+    description: 'Sword',
+    testDescription: 'Advanced difficulty only.',
+    passRequirement: 'Score 19/20 to advance'
+  },
+  { 
+    id: 5, 
+    name: 'Nodachi', 
+    icon: 'Crown', 
+    description: 'Great sword',
+    testDescription: 'The ultimate test. Only the hardest questions.',
+    passRequirement: 'Score 20/20 (Flawless) to conquer'
+  },
 ] as const
 
 export const difficultyPresets = [
@@ -72,4 +111,8 @@ export const RANKS = weaponRanks
 
 export function getDifficultyTheme(presetId: PresetId) {
   return difficultyThemes[presetId]
+}
+
+export function getRankColor(presetId: PresetId, rankId: number) {
+  return difficultyThemes[presetId].ranks[rankId - 1] || difficultyThemes[presetId].primary
 }
