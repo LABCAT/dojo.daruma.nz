@@ -15,5 +15,8 @@
     "react-native": {
       "optional": true
     }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
   }
 }
