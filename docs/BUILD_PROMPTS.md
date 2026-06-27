@@ -117,7 +117,7 @@ Read `AGENTS.md` before starting.
 ### Install
 Run from repo root:
 ```bash
-pnpm --filter multiplication-dojo add react-native-mmkv
+pnpm --filter multiplication-dojo add react-native-mmkv@2.12.2
 pnpm install
 ```
 
@@ -911,8 +911,8 @@ In `app/(dojo)/challenge.tsx`:
   next question appears
 
 #### 4. StatusBar styling
-On every screen:
-- `<StatusBar barStyle="light-content" backgroundColor="#0A0A0A" />`
+On every screen (import from `expo-status-bar`):
+- `<StatusBar style="light" backgroundColor="#0A0A0A" />`
 - This prevents the white status bar flash on Android
 
 #### 5. Safe area on all screens
