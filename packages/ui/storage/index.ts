@@ -4,9 +4,24 @@ import { PresetId } from '../theme/tokens'
 export type RankId = 1 | 2 | 3 | 4 | 5
 export type RankStatus = 'locked' | 'current' | 'complete'
 
-export const storage = new MMKV({
-  id: 'daruma-dojo'
-})
+// Expo Go does not include the native C++ code for MMKV.
+// We catch the error and provide an in-memory fallback so you can continue
+// developing in Expo Go until you build a native Dev Client.
+let storage: any;
+try {
+  storage = new MMKV({
+    id: 'daruma-dojo'
+  })
+} catch (e) {
+  console.warn("Native MMKV module not found (likely running in Expo Go). Using in-memory fallback.");
+  const memoryStore = new Map<string, string | number | boolean>();
+  storage = {
+    set: (key: string, value: string | number | boolean) => memoryStore.set(key, value),
+    getString: (key: string) => memoryStore.get(key) as string | undefined,
+    delete: (key: string) => memoryStore.delete(key),
+    clearAll: () => memoryStore.clear()
+  }
+}
 
 export function getActiveDifficulty(): PresetId {
   const value = storage.getString('difficulty')
