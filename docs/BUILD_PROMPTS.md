@@ -2,9 +2,17 @@
 
 ## How to use these prompts
 Paste one complete prompt section into Antigravity at a time. Complete every
-verification item before moving to the next prompt. The prompts reference
-AGENTS.md and DESIGN.md which live in the repo root — read those files first
-in every session.
+verification item before moving to the next prompt. Read `AGENTS.md` and
+`DESIGN.md` in every session.
+
+**Status:** Prompts 02–08 are largely **implemented**. **Prompt 09 (Practice Mode) is
+NOT done** — `(practice)/index.tsx` is still a NumberPad test stub. **Do Prompt
+09 next**, then optional Prompt 10 (verify/copy animations), then Prompt 11
+(visual pass), then Prompt 12 (EAS, **public Play launch prep**, store listing ASO,
+metrics + crash-reporting guides). **Android only** — no iOS.
+
+Superseded patterns: Prompt 02 inline difficulty → `difficulty.tsx`; Prompts
+06/08 rank-unlock route → celebration overlay on `challenge.tsx`.
 
 ---
 
@@ -765,76 +773,83 @@ feat: rank unlock celebration with staged entrance animations
 
 ---
 
-## PROMPT 09 — Practice Mode Screen
+## PROMPT 09 — Practice Mode Screen (NOT COMPLETE)
+
+### Current state
+`(practice)/index.tsx` is a **placeholder** (“Test Pad” + NumberPad only). The
+`usePractice` hook in `@daruma/ui` **already exists** — wire it up; do not
+rewrite the hook unless you find a bug.
 
 ### Mission
-Build Practice Mode — infinite questions, no pressure, no rank at stake.
-Just a player and their multiplication tables. This screen serves both the
-nervous beginner warming up and the adult grinding mental math before bed.
+Build Practice Mode — infinite questions, no rank pressure, streak combo when
+you’re on a roll. Arcade training-yard feel per `DESIGN.md` (bright, readable,
+path-colour accents).
 
-### Read First & Deep Research
-Read `AGENTS.md` and `DESIGN.md` before starting.
-Research the `usePractice` hook and `challenge.tsx` for auto-advance behaviour.
-Use normal Expo Router APIs (`push`, `back`, `replace`) — see `apps/multiplication-dojo/AGENTS.md`.
+### Read first
+1. `DESIGN.md` — arcade symbology (path medallion, no rank header)
+2. `apps/multiplication-dojo/AGENTS.md` — no router/storage refactors
+3. `app/(dojo)/challenge.tsx` — **copy layout/animation patterns**, not rank logic
 
 ### Prerequisites
-- Prompt 08 complete and verified on device
+- Prompt 08 complete (celebration overlay on challenge)
 
-### Files to create
-- `apps/multiplication-dojo/app/(practice)/_layout.tsx`
-- `apps/multiplication-dojo/app/(practice)/index.tsx`
+### Hard scope limits
+- Touch **only** `(practice)/_layout.tsx` and `(practice)/index.tsx`
+- **No** changes to `usePractice`, storage, challenge, dojo, or home
+- **No** new routes or npm dependencies
+- Reuse `NumberPad` from `@daruma/ui`; no system keyboard
 
-### Navigation Contract
-**From:** Home screen "PRACTICE" button
-**Back:** Back arrow or "END SESSION" confirmation → `router.replace('/')`
+### Files to update
+- `apps/multiplication-dojo/app/(practice)/_layout.tsx` — `backgroundColor: '#0F0F18'`
+- `apps/multiplication-dojo/app/(practice)/index.tsx` — full practice screen
 
-### Imports Required
+### Navigation
+- **From:** Home “Practice” → `router.push('/(practice)')` (already wired)
+- **Back / exit:** “End Session” → native `Alert` → confirm → `router.replace('/')`
+
+### Imports
 ```ts
-import { usePractice, NumberPad, PRESETS, getActiveDifficulty } from '@daruma/ui'
+import { usePractice, NumberPad, getActiveDifficulty, getDifficultyTheme } from '@daruma/ui'
 import type { PresetId } from '@daruma/ui'
 ```
 
-### Key Differences from Challenge Screen
-| Feature | Challenge | Practice |
-|---------|-----------|---------|
-| Questions | 20 total | Infinite |
-| Pass/fail | Yes (17/20) | No |
-| Progress bar | Yes | No |
-| Rank context | Shown in header | Not shown |
-| Score display | correctCount / totalQuestions | correctCount / totalCount |
-| Streak | No | Yes (show when ≥ 3) |
-| Exit | Back button blocked during active | "End Session" always visible |
+### Behaviour (from `usePractice`)
+| Feature | Practice |
+|---------|----------|
+| Questions | Infinite |
+| Pass/fail | None |
+| Progress bar | No |
+| Rank in header | No — show **path name** + path icon medallion |
+| Score | `{correctCount}/{totalCount}` |
+| Streak | Show when `streak >= 3` — combo-counter energy |
+| Preset | `getActiveDifficulty()` on mount only (chosen on Home / Change Path) |
+| Auto-advance | 800ms after submit, same as challenge |
+| End Session | Always visible; Alert with session stats |
 
-### Business Rules
-- `preset` read from `getActiveDifficulty()` on mount — player chose it on
-  Home screen, do not let them change it here
-- Input resets after each auto-advance (same 800ms pattern as challenge)
-- "End Session" button always visible, not just on fail
-- Tapping "End Session" shows a native `Alert` with:
-  - Title: `'End Session?'`
-  - Message: `'You answered {totalCount} questions with {correctCount} correct.'`
-  - Buttons: `[{ text: 'Keep Going', style: 'cancel' }, { text: 'End Session', style: 'destructive', onPress: () => router.replace('/') }]`
-- Streak display: only visible when `streak >= 3`. Show streak count
-  prominently — this is the fun metagame of Practice Mode.
+**End Session Alert:**
+- Title: `'End Session?'`
+- Message: `'You answered {totalCount} questions with {correctCount} correct.'`
+- Buttons: `Keep Going` (cancel) | `End Session` (destructive → `router.replace('/')`)
 
-### Aesthetic Direction
-Looser than the challenge screen — this is the training yard, not the arena.
-But still dark, still deliberate. The streak counter, when it appears, should
-feel exciting — like a combo counter in a game. The "End Session" button should
-be unobtrusive but always findable.
+### UI requirements
+1. **Header:** “PRACTICE”, active path name in `theme.primary`, path icon medallion
+   (`PRESETS[].icon` from tokens — see DESIGN.md)
+2. **Question area:** Same hierarchy as challenge (72px+ numbers, rank-colour not
+   needed — use **path primary** for × operator and accents)
+3. **Feedback:** Copy challenge’s inline slash (correct) + shake (wrong) animations
+   — do not extract a shared hook in this prompt
+4. **Streak:** Prominent when ≥ 3 (e.g. “{n} STREAK” in path colour)
+5. **End Session:** Ghost/secondary button — always tappable (no back-lock)
 
 ### Verification — on device
-- [ ] Practice screen loads with first question immediately
-- [ ] Header shows "PRACTICE" title and active difficulty in gold
-- [ ] Header shows score `{correct}/{total}`, updating after each answer
-- [ ] Correct + wrong feedback works identically to challenge screen
-- [ ] After 3 consecutive correct: streak counter appears
-- [ ] Wrong answer: streak counter resets to 0 (and hides if below 3)
-- [ ] "End Session" button always visible
-- [ ] Tapping "End Session": Alert appears with correct session stats
-- [ ] Confirming End Session: navigates to Home
-- [ ] Cancelling: resumes session with same score
-- [ ] `pnpm typecheck` — zero errors
+- [ ] Practice loads with first question immediately
+- [ ] Header: PRACTICE + path name + path icon
+- [ ] Score updates after each answer
+- [ ] Correct/wrong feedback matches challenge feel
+- [ ] Streak appears at 3+; resets on wrong answer
+- [ ] End Session → Alert with correct stats → Home on confirm
+- [ ] Cancel Alert → session continues with same score
+- [ ] `pnpm typecheck` passes
 
 ### Commit
 ```
@@ -843,280 +858,260 @@ feat: Practice Mode with infinite questions and streak counter
 
 ---
 
-## PROMPT 10 — Answer Feedback Animations
+## PROMPT 10 — Answer Feedback Animations (optional after 09)
 
-### Mission
-Add kinetic feedback to the challenge and practice screens. Right now the colour
-change is instantaneous — make it feel alive. A correct answer should sing.
-A wrong answer should sting.
+### Status
+Challenge already has inline animations. **Run after Prompt 09** — practice
+should include slash/shake when built. Skip this prompt if both screens feel good
+on device.
 
-### Read First & Deep Research
-Read `AGENTS.md` and `DESIGN.md` before starting.
-Research existing `challenge.tsx` and home screen before injecting animations.
-Use normal Expo Router APIs — see `apps/multiplication-dojo/AGENTS.md`.
+### Mission (if anything remains)
+Verify challenge feel on device. If **practice** lacks slash/shake, copy the
+**same inline pattern** from challenge — do not create `packages/ui/hooks/useAnswerAnimation.ts`.
 
-### Prerequisites
-- Prompt 09 complete and verified on device
-
-### Files to create
-`packages/ui/hooks/useAnswerAnimation.ts`
-
-Add to `packages/ui/index.ts`:
-```ts
-export * from './hooks/useAnswerAnimation'
-```
-
-### TypeScript Contract
-```ts
-export interface UseAnswerAnimationReturn {
-  playCorrect: () => void   // call when lastAnswerCorrect becomes true
-  playWrong: () => void     // call when lastAnswerCorrect becomes false
-  // Apply both to the answer box Animated.View:
-  animatedStyle: {
-    transform: object[]
-    backgroundColor: Animated.AnimatedInterpolation<string>
-  }
-}
-
-export function useAnswerAnimation(): UseAnswerAnimationReturn
-```
-
-### Animation Specs
-**Correct answer** (`playCorrect`):
-- Answer box background flashes from neutral → `success` colour → neutral
-- Smooth transition, total duration your creative call (~400–600ms feels right)
-- Use `useNativeDriver: false` (background colour cannot use native driver)
-
-**Wrong answer** (`playWrong`):
-- Answer box shakes horizontally (translate X oscillation)
-- Answer box background flashes from neutral → `accent` colour → neutral
-- Shake and colour flash run simultaneously
-- Use `useNativeDriver: true` for transform, `useNativeDriver: false` for colour
-- This means you need two separate Animated.Values
-
-**Important:** `playCorrect` and `playWrong` must both reset all animation
-values before playing, so calling them rapidly never leaves the UI in a broken
-state.
-
-### Integration Instructions
-In BOTH `app/(dojo)/challenge.tsx` AND `app/(practice)/index.tsx`:
-
-1. Import and call `useAnswerAnimation()`
-2. Add a `useEffect` watching `lastAnswerCorrect`:
-   - When it becomes `true`: call `playCorrect()`
-   - When it becomes `false`: call `playWrong()`
-   - When it becomes `null`: do nothing (auto-advance, handled elsewhere)
-3. Replace the answer box `<View>` with `<Animated.View>` applying `animatedStyle`
-4. Remove any static background colour from the answer box — the animation
-   handles colour entirely
-
-### Pitfalls to Avoid
-- Do not apply `useNativeDriver: true` to background colour — it will silently
-  fail or crash
-- Do not use a single `Animated.Value` for both colour and transform — they
-  need separate drivers
-- Ensure `playCorrect` and `playWrong` both stop any in-progress animation
-  before starting (`animation.stop()` or reset values first)
+### Scope limits
+- Touch **only** `app/(practice)/index.tsx` if practice animations are missing
+- **No** changes to challenge logic, hooks, storage, or router
+- **No** new dependencies
 
 ### Verification — on device
-- [ ] Correct answer: smooth green flash on answer box
-- [ ] Wrong answer: red flash AND horizontal shake simultaneously
-- [ ] Answering rapidly (back to back): animations don't break or get stuck
-- [ ] Animation completes within the 800ms auto-advance window (doesn't overlap
-      with next question loading)
-- [ ] Practice screen: same animations, same feel
-- [ ] `pnpm typecheck` — zero errors
+- [ ] Challenge: correct = slash + pulse; wrong = shake
+- [ ] Practice: same feedback (or skip if already matched)
+- [ ] Rapid answers: animations don’t stick or overlap badly
+- [ ] `pnpm typecheck` passes
+
+### Commit (only if practice was updated)
+```
+feat: match practice answer feedback to challenge animations
+```
+
+**If challenge + practice both feel good — skip Prompt 10 and go to 11.**
+
+---
+
+## PROMPT 11 — Design Pass (Tier 1, ship-safe)
+
+### Prerequisites
+- **Prompt 09 complete** (Practice Mode is real gameplay, not the test stub)
+- Prompt 10 optional (animation verify)
+
+### Mission
+One focused visual pass: make the app feel **bright, anime-arcade, and exciting**
+without rewriting game logic, navigation, or storage. Target **“decent and
+shippable”**, not portfolio perfection.
+
+**Replaces** the old “polish pass” (back lock, safe area, dev reset — already done).
+
+### Read first
+1. `DESIGN.md` (updated anime/arcade direction — follow exactly)
+2. `apps/multiplication-dojo/AGENTS.md` (Pressable/View rule, no router hacks)
+3. `docs/DEBUGGING.md` if anything crashes
+
+### Hard scope limits — agent MUST obey
+
+- **Touch at most 8 files** (listed below). No new routes, no hook rewrites.
+- **No** changes to `packages/ui/storage`, `useChallenge`, `usePractice`, or Expo Router structure.
+- **No** new npm dependencies (no Lottie, no Skia, no Reanimated upgrades).
+- **No** fake router rules. Use existing `push` / `back` / `replace`.
+- If a screen already works, **enhance styling only** — do not relocate logic.
+- **`tokens.ts`**: may use existing `icon` / `japanese` fields only — **do not**
+  change rank colour hex values.
+
+### Files in scope (only these)
+
+1. `packages/ui/theme/tokens.ts` — **read only** unless fields missing (already has path + rank icons)
+2. `apps/multiplication-dojo/tailwind.config.js` — add `surface-bright` token if needed
+3. `apps/multiplication-dojo/app/index.tsx` — home: glow, path medallion, rank badge
+4. `apps/multiplication-dojo/app/difficulty.tsx` — path icon per row (from `preset.icon`)
+5. `apps/multiplication-dojo/app/(dojo)/index.tsx` — rank medallions + kanji (keep View/Pressable rule)
+6. `apps/multiplication-dojo/app/(dojo)/challenge.tsx` — ambient bg, rank icon in header (logic unchanged)
+7. `apps/multiplication-dojo/components/RankCelebrationOverlay.tsx` — hero medallion + big kanji
+8. `apps/multiplication-dojo/app/(practice)/index.tsx` — **optional** if time: same ambient + symbology as challenge
+
+### Visual requirements (implement all)
+
+1. **Backgrounds**: `#0F0F18` base + soft coloured glow orb per screen (path or rank colour, 10–15% opacity).
+2. **Surfaces**: Cards use `surface` / `surface-bright` — visibly separated from background.
+3. **Rank colour hero**: CTAs and accents use `getRankColor()` / `theme.primary` — not default gold.
+4. **Path symbology**: Circular medallion with `PRESETS[].icon` on home, Change Path, Dojo header.
+5. **Rank symbology**: Circular medallion with `RANKS[].icon` on Dojo rows, home weapon card, celebration hero. Kanji from `RANKS[].japanese` beside English name — visible, not tiny footnotes.
+6. **Dojo list**: Current rank = glowing border + tinted fill. Complete = colourful check. Locked = dimmed but hue-visible. **Only current row is Pressable.**
+7. **Celebration**: Large kanji + 64–80px rank medallion, strong colour flash, clear Continue.
+8. **Typography**: Challenge keeps 72px+ question numbers.
+
+### Explicitly out of scope
+
+- Redesigning rank/path **colour hex** values in `tokens.ts`
+- Custom SVG, mon crests, emoji, or new icon libraries
+- New screens, rank-unlock route, Maestro, EAS
+- Extracting shared hooks or refactoring challenge animations
+- “Audit all router.replace calls” or NavigationContainer folklore
+
+### Verification — device, one session
+
+- [ ] Home: path + rank medallions visible; card pops on tinted background
+- [ ] Change Path: each row shows its path icon medallion
+- [ ] Dojo: rank medallion + kanji on every row; current rank obvious; **no crash** after dev unlock
+- [ ] Challenge: rank icon in header + ambient glow; gameplay unchanged
+- [ ] Pass challenge: big kanji + rank medallion on overlay; Continue → Dojo works
+- [ ] `pnpm typecheck` passes
+
+### If stuck
+
+Stop. Do not refactor architecture. Report which screen and what broke.
 
 ### Commit
 ```
-feat: correct/wrong answer animations on challenge and practice screens
+feat: tier-1 arcade visual pass with path and rank symbology
 ```
 
 ---
 
-## PROMPT 11 — Polish Pass
+## PROMPT 12 — Public Play Store launch (Android only)
 
 ### Mission
-Close the gap between "it works" and "it's ready to ship." These are the
-details that separate a professional product from a prototype.
+Prepare **everything needed to go public** on Google Play — not just a build
+config. Shane’s first app: no Play Console yet, Android only, goal is a **live
+Production** listing people can find and install.
 
-### Read First & Deep Research
-Read `AGENTS.md` before starting.
-Follow rank-list and NativeWind rules in `apps/multiplication-dojo/AGENTS.md`.
+Deliver:
+1. EAS build config + verified `app.json`
+2. **Store listing copy optimized for ASO** (Play Store search — not web SEO)
+3. **Human guides** in `docs/` for deployment, measuring success, and crash reporting
 
-### Prerequisites
-- Prompt 10 complete and verified on device
+### Product decisions (locked — do not ask)
+- **Platform:** Android only — never `eas build --platform ios`
+- **Launch target:** **Production (public)** — Internal Testing is an optional
+  sanity-check step *on the way*, not the finish line
+- **Play Console:** User has no account — guides include full signup ($25)
+- **Revenue / crashes for v1:** Multiplication Dojo is offline/local — **do not**
+  integrate paid analytics or crash SDKs in this prompt; **document** choices for
+  future Daruma Dojo apps instead
 
-### Polish Items — implement all of them
-
-#### 1. Disable back navigation during active challenge
-In `app/(dojo)/challenge.tsx`:
-- Android hardware back: `BackHandler.addEventListener('hardwareBackPress', () => true)` while `status === 'active'`. Remove listener when status changes.
-- Header back arrow: visually muted (grey/dark) and non-functional while `status === 'active'`
-- This ensures a player cannot accidentally exit a challenge they are
-  passing
-
-#### 2. Prevent double-submit
-In `app/(dojo)/challenge.tsx` and `app/(practice)/index.tsx`:
-- After calling `submitAnswer(input)`, immediately disable the submit
-  button in local state until `lastAnswerCorrect` returns to `null`
-- This must be tracked in local `useState` — the hook's `lastAnswerCorrect`
-  alone is not sufficient because it has an 800ms delay
-
-#### 3. Progress bar reflects answered count — not question index
-In `app/(dojo)/challenge.tsx`:
-- Progress = `answeredCount / totalQuestions`
-- `answeredCount` = `questionIndex + 1` when `lastAnswerCorrect !== null`,
-  else `questionIndex`
-- The bar should only advance AFTER an answer is submitted, not when the
-  next question appears
-
-#### 4. StatusBar styling
-On every screen (import from `expo-status-bar`):
-- `<StatusBar style="light" backgroundColor="#0A0A0A" />`
-- This prevents the white status bar flash on Android
-
-#### 5. Safe area on all screens
-Verify every screen wraps content in `<SafeAreaView>` from
-`react-native-safe-area-context`. Fix any screen that uses `<View>` as the
-root instead.
-
-#### 6. Dev reset on Home screen
-Add to `apps/multiplication-dojo/app/index.tsx` (only visible in dev builds):
-```tsx
-{__DEV__ && (
-  <Pressable onPress={resetAllProgress} style={{ marginTop: 20, alignItems: 'center' }}>
-    <Text style={{ color: '#1A1A1A', fontSize: 10, letterSpacing: 2 }}>
-      DEV · RESET ALL PROGRESS
-    </Text>
-  </Pressable>
-)}
-```
-Import `resetAllProgress` from `@daruma/ui`. This button is intentionally near-invisible in dark mode.
-
-### Verification — on device
-- [ ] Hardware back button does nothing during an active challenge
-- [ ] Back arrow is visually muted and non-functional during active challenge
-- [ ] Rapid double-tap on Submit: only one answer registered
-- [ ] Progress bar advances only after answer submission (not on question load)
-- [ ] Status bar is dark text on all screens (light-content)
-- [ ] No content hidden behind notch or home indicator on any screen
-- [ ] DEV reset button barely visible at bottom of Home screen in dark mode
-- [ ] Tapping DEV reset: all rank progress clears, difficulty resets to Ashigaru
-- [ ] `pnpm typecheck` — zero errors
-
-### Commit
-```
-feat: polish pass — back lock, double-submit prevention, safe areas, dev reset
-```
-
----
-
-## PROMPT 12 — EAS Build + Play Store
-
-### Mission
-Configure EAS Build and produce a production-ready Android App Bundle for
-Play Store submission.
-
-### Read First
-Read `AGENTS.md` before starting.
+### Read first
+- `AGENTS.md`, `DESIGN.md` (tone: anime arcade, fun, educational)
+- `.agents/skills/expo-deployment/SKILL.md` if EAS build fails
 
 ### Prerequisites
-- All prompts 01–11 complete and verified on device
-- Expo account created at expo.dev
-- `eas-cli` installed globally
+- Prompt 09 complete; Prompt 11 recommended (screenshots should look good)
 
-### Files to create/update
+### Code / config files
 
-**`apps/multiplication-dojo/eas.json`** — create exactly:
-```json
-{
-  "cli": {
-    "version": ">= 10.0.0"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "android": { "buildType": "apk" }
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": { "buildType": "apk" }
-    },
-    "production": {
-      "android": { "buildType": "app-bundle" }
-    }
-  }
-}
-```
+**1. `apps/multiplication-dojo/eas.json`** — development, preview (APK), production (AAB).
 
-**`apps/multiplication-dojo/app.json`** — update/verify these exact fields:
-```json
-{
-  "expo": {
-    "name": "Multiplication Dojo",
-    "slug": "multiplication-dojo",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#0A0A0A",
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0A0A"
-      },
-      "package": "nz.daruma.dojo.multiplicationdojo",
-      "versionCode": 1
-    },
-    "plugins": ["expo-router", "react-native-mmkv"],
-    "experiments": { "typedRoutes": true }
-  }
-}
-```
+**2. `apps/multiplication-dojo/app.json`** — verify, do not blindly overwrite:
 
-### Commands — run in order from `apps/multiplication-dojo/`
+| Field | Expected value |
+|-------|----------------|
+| `android.package` | `nz.daruma.dojo.multiplicationdojo` |
+| `android.versionCode` | `1` |
+| `backgroundColor` | `#0F0F18` |
+| `userInterfaceStyle` | `dark` |
+| Adaptive icon | Keep existing asset paths |
+| `plugins` | Keep `expo-router`, `expo-font` — add only if build requires |
 
-```bash
-# 1. Link to Expo account and generate projectId in app.json
+Commit `extra.eas.projectId` after `eas init`.
+
+### Required docs (all in `docs/` — do not scatter)
+
+#### A. `docs/play-store-deployment.md`
+Technical checklist: Expo → EAS preview APK on device → production AAB → Play
+Console app creation → upload → content rating → **Production release**.
+
+Include:
+- PowerShell commands from `apps/multiplication-dojo/`
+- Screenshot specs (phone: min 2, recommend 4–8; 16:9 or 9:16)
+- Feature graphic 1024×500 (what to put on it)
+- **Privacy policy:** this app collects no user data locally — note that Play
+  still wants a policy URL; suggest a simple static page on daruma.nz (human task)
+- Internal Testing as optional 30-minute smoke test before Production
+- Version bump checklist for updates (`version`, `versionCode`, rebuild, release notes)
+
+Link to `play-store-listing.md`, `app-metrics.md`, `crash-reporting.md`.
+
+#### B. `docs/play-store-listing.md` — **ASO copy (agent writes this)**
+Google Play discovery = **ASO** (App Store Optimization): title + short
+description + full description + screenshots drive search and installs.
+
+Agent must draft **ready-to-paste** listing content:
+
+| Field | Limit | Requirements |
+|-------|-------|----------------|
+| App title | 30 chars | Brand + primary keyword (e.g. times tables / multiplication) |
+| Short description | 80 chars | Hook + top keyword — highest-visibility text |
+| Full description | 4000 chars | Scannable: bullets, benefits, who it’s for (kids + adults), offline, gamified dojo theme, weapon ranks, practice mode, no ads (if true), no account required |
+
+**ASO rules for the copy:**
+- Front-load keywords naturally: multiplication, times tables, math practice, kids, mental math, educational game
+- Lead with outcome (“Master times tables…”) not features jargon
+- Distinct voice — arcade dojo, not generic homework app
+- Include a “Why Daruma Dojo?” section
+- Honest: don’t promise “thousands of downloads” — ASO improves discoverability; ratings and word-of-mouth matter too
+- Suggest 5–10 screenshot captions (what to show on each screen for conversion)
+
+Also draft: **release notes v1.0.0** (what’s new, first release).
+
+#### C. `docs/app-metrics.md` — **How will I know if it’s successful?**
+Teach Shane what to watch, free tools only for v1:
+
+**Must include:**
+1. **Play Console (free, built-in)** — installs, uninstalls, active devices,
+   countries, store listing conversion (views → installs), ratings/reviews
+2. **What “success” looks like for v1** — realistic solo-dev milestones, e.g.:
+   - Week 1: first 10 installs (friends/family), zero crash reports in reviews
+   - Month 1: steady install trend, 4+ star average, 50+ installs = validation
+   - Month 3: organic search installs appearing in Play Console acquisition report
+3. **Weekly 5-minute checklist** — where to click in Play Console
+4. **Optional later (document, don’t install in v1):**
+   - Firebase Analytics (free) — if in-app events needed
+   - EAS Observe (Expo) — performance/startup, not download counts
+5. **What this app cannot measure without SDK work** — session length, rank completion funnels (note for future)
+
+#### D. `docs/crash-reporting.md` — **Cheap/free bug reports (future apps)**
+Comparison for Daruma Dojo portfolio — **recommend one default** for paid/revenue apps:
+
+| Tool | Free tier | RN/Expo | Notes |
+|------|-----------|---------|-------|
+| **Sentry** | Yes (generous dev tier) | Excellent | **Default recommendation** — errors, breadcrumbs, release tracking |
+| Raygun | Limited trial | Good | Paid-first for most teams |
+| Bugsnag | Limited free | Good | Similar to Sentry |
+
+**Must include:**
+- When to add crash reporting (before taking money / before marketing spend)
+- Sentry + Expo setup outline (high level — link to docs; full integration is a *future prompt*, not v1)
+- How crashes surface: email alerts, dashboard, linking to `versionCode`
+- Play Console **Android vitals** and user reviews as free crash signal for v1
+- Privacy: crash reports may contain device info — mention in privacy policy when enabled
+
+### Commands (from `apps/multiplication-dojo/`)
+
+```powershell
 npx eas-cli login
 npx eas-cli init
-
-# 2. Preview build (APK) — install on device to verify production behaviour
 npx eas-cli build --platform android --profile preview
-
-# 3. Only after preview APK verified on device:
+# Verify APK on physical device, then:
 npx eas-cli build --platform android --profile production
 ```
 
-Monitor builds at expo.dev. Preview build takes ~10–15 minutes.
+Agent runs builds if credentials allow; otherwise commit config + complete docs.
 
 ### Verification
-- [ ] `eas.json` created with all three profiles
-- [ ] `app.json` has `"package": "nz.daruma.dojo.multiplicationdojo"`
-- [ ] `app.json` has `"versionCode": 1`
-- [ ] EAS init succeeds and adds `projectId` to `app.json`
-- [ ] Preview build completes without errors
-- [ ] Preview APK downloads and installs on physical Android device
-- [ ] ALL screens work in preview build (no Metro server, fully standalone)
-- [ ] No white flash, no status bar issues, all animations play
-- [ ] Production AAB build completes without errors
+- [ ] `eas.json` + `app.json` production-ready
+- [ ] `docs/play-store-deployment.md` — full path to **public Production**
+- [ ] `docs/play-store-listing.md` — ASO title, short + full description, screenshot captions
+- [ ] `docs/app-metrics.md` — Play Console metrics + realistic success milestones
+- [ ] `docs/crash-reporting.md` — Sentry recommended, free-tier comparison, v1 uses Play vitals only
+- [ ] Listing copy matches app (ranks, practice, offline, dojo theme)
+- [ ] No iOS build steps anywhere
+- [ ] `pnpm typecheck` passes
 
 ### Commit
 ```
-feat: EAS build config — preview and production Android profiles
+feat: Play Store public launch prep — EAS config and deployment docs
 ```
 
-### Play Store submission (human steps — not agent tasks)
-1. Google Play Console: play.google.com/console ($25 one-time developer fee)
-2. Create app with package `nz.daruma.dojo.multiplicationdojo`
-3. Upload production `.aab` to Internal Testing track
-4. Complete store listing:
-   - App icon: 512×512px PNG
-   - Feature graphic: 1024×500px
-   - Screenshots: minimum 2, maximum 8
-   - Short description: max 80 characters
-   - Full description: max 4000 characters
-5. Complete content rating questionnaire (select "Educational")
-6. Submit for review — first submission typically takes 1–3 days
-
+### Human steps after commit
+1. Follow `docs/play-store-deployment.md`
+2. Paste listing from `docs/play-store-listing.md` into Play Console
+3. After launch, use `docs/app-metrics.md` weekly
+4. Before monetized apps, follow `docs/crash-reporting.md` to add Sentry

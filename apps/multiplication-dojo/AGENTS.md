@@ -1,8 +1,8 @@
 ﻿# Multiplication Dojo — App Agent Rules
 
-First Daruma Dojo app. Gamified times tables for all ages with Japanese samurai
-theme. Read `../../AGENTS.md`, `../../DESIGN.md`, and **`../../docs/DEBUGGING.md`**
-before debugging crashes or changing navigation/storage architecture.
+First Daruma Dojo app. Gamified times tables — **anime / arcade** Japanese
+theme (see `../../DESIGN.md`). Read `../../AGENTS.md` and `../../docs/DEBUGGING.md`
+before debugging crashes or changing navigation/storage.
 
 ## App Identity
 
@@ -24,7 +24,7 @@ app/
 │   └── challenge.tsx     # Challenge + celebration overlay
 └── (practice)/
     ├── _layout.tsx
-    └── index.tsx
+    └── index.tsx         # Practice — Prompt 09 (currently stub)
 ```
 
 ## Expo Router
@@ -81,11 +81,18 @@ storage.set(`rank:${preset}:${rankId}`, status)
 2. Show `RankCelebrationOverlay` on same screen
 3. Continue → `router.replace('/(dojo)')`
 
+## Symbology
+
+Path and rank icons + kanji come from `@daruma/ui` tokens (`PRESETS[].icon`,
+`RANKS[].icon`, `RANKS[].japanese`). Render as circular **medallions** per
+`DESIGN.md` — Lucide only, no custom SVG in v1.
+
 ## What NOT to Do
 
 - No system keyboard — use `NumberPad` from `@daruma/ui`
 - No backend calls — everything is local
 - No skip rank in production UI
 - Never use disabled `Pressable` for non-interactive rank rows in Dojo
-- Never refactor routes/storage/imports as a first response to a redbox — follow
-  `docs/DEBUGGING.md`
+- Never refactor routes/storage/imports during a **design-only** pass — follow
+  `docs/DEBUGGING.md` and Prompt 11 scope limits in `docs/BUILD_PROMPTS.md`
+- Follow `DESIGN.md` anime/arcade direction — not the old “midnight dojo” aesthetic

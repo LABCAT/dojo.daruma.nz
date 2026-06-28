@@ -1,186 +1,225 @@
 # Daruma Dojo — Design System
 
-Japanese samurai aesthetic. Dark, cinematic, dramatic. Ink, stone, steel.
-NOT cartoon, NOT child-like, NOT bright/playful. Think: a dojo at midnight.
+Japanese **anime / arcade game** aesthetic. Bright, energetic, satisfying —
+like a mobile training game or shōnen power-up screen. **Fun for kids, sharp
+enough for adults.**
 
-## Premium Aesthetic Rules
-- **Dynamic Theming Context**: UI components MUST consume the current difficulty theme (`getDifficultyTheme()`). Base gold (`#C9A84C`) should only be used as a fallback. Accents, active borders, and highlights must shift dynamically based on whether the user is playing Ashigaru, Samurai, Ronin, or Shogun.
-- **Tactile Micro-interactions**: The UI should feel like forged steel or carved stone. Every interactive element MUST have `active:` states that visually respond (e.g. background color shifts to `theme.primaryDim` or a darker `#2A2A2A` active surface). 
-- **Depth & Texture**: Do not use drop shadows. Instead, use varying border opacities (`border`, `border-t`, `border-b`) or subtle `bg-surface` layering to emulate 3D lighting without the cheap feel of CSS shadows.
+Still Japanese-themed (weapons, kanji, dojo framing). **Not** grim midnight
+samurai. **Not** corporate ed-tech grey.
 
-## Colour Palette
+## Design north star
 
-| Token           | Hex       | Usage                          |
-|-----------------|-----------|--------------------------------|
-| `background`    | `#0A0A0A` | Screen backgrounds             |
-| `surface`       | `#141414` | Cards, panels, modals          |
-| `border`        | `#2A2A2A` | Subtle dividers                |
-| `primary`       | `#C9A84C` | Gold — rank, achievement, CTA  |
-| `primary-dim`   | `#8A6F2E` | Muted gold — inactive states   |
-| `accent`        | `#8B1A1A` | Blood red — wrong answer       |
-| `accent-bright` | `#E53535` | Bright red — alerts            |
-| `text`          | `#F0EDE8` | Primary text (warm white)      |
-| `text-muted`    | `#8A8580` | Secondary / helper text        |
-| `success`       | `#2D6A2D` | Correct answer                 |
-| `success-bright`| `#4CAF50` | Success states                 |
+- **Exciting** — colour, motion, feedback when you succeed
+- **Readable** — big numbers, high contrast, obvious CTAs
+- **Shippable** — polish in layers; never block release on perfect art
+
+Reference feel: anime battle UI, mobile gacha training screens, rhythm-game
+hit feedback — **not** dark cinematic letterboxing.
+
+## Premium rules
+
+- **Dynamic theming**: Use `getDifficultyTheme(preset)` and `getRankColor(preset, rankId)` everywhere. Base gold (`#C9A84C`) is fallback only.
+- **Rank colours are the hero**: Each weapon rank has its own saturated colour in `theme.ranks[]`. Use them for buttons, glows, progress, and celebration — not flat gold.
+- **Tactile feedback**: Buttons and keys must respond on press (`scale`, colour shift, or both). Correct answers should **feel good** (flash + motion).
+- **Depth without mud**: Prefer **soft glow + tinted panels** over pure black-on-black. Subtle gradients and coloured ambient backgrounds are OK.
+
+## Colour palette (global tokens)
+
+| Token            | Hex       | Usage                              |
+|------------------|-----------|------------------------------------|
+| `background`     | `#0F0F18` | Screen base — dark blue-black, not pure `#000` |
+| `surface`        | `#1C1C28` | Cards, panels                      |
+| `surface-bright` | `#252536` | Elevated / active cards            |
+| `border`         | `#3A3A50` | Visible but soft dividers          |
+| `primary`        | `#C9A84C` | Fallback gold only                 |
+| `primary-dim`    | `#8A6F2E` | Pressed / muted gold               |
+| `accent`         | `#8B1A1A` | Wrong answer                       |
+| `accent-bright`  | `#E53535` | Wrong answer highlight             |
+| `text`           | `#F0EDE8` | Primary text                       |
+| `text-muted`     | `#8A8580` | Secondary text                     |
+| `success`        | `#2D6A2D` | Correct (subtle)                   |
+| `success-bright` | `#4CAF50` | Correct (pop)                      |
+
+Add `surface-bright` to `tailwind.config.js` when implementing design pass.
+
+## Difficulty themes & rank sub-colours
+
+Each preset has a **primary** (path identity) and **five rank colours** (weapon
+progression). Rank colours are **intentionally varied** — each weapon tier feels
+like a new “form”, not just a tint of the path colour. They should still read as
+**escalation** ( trainee → master ), not random noise.
+
+| Preset   | Path vibe        | Rank progression idea                          |
+|----------|------------------|-----------------------------------------------|
+| Ashigaru | Copper / earth   | Wood → steel → bronze → silver → gold         |
+| Samurai  | Steel blue       | Cool blues → electric → neon → royal → climax |
+| Ronin    | Crimson          | Ember → flame → gold → blood → void           |
+| Shogun   | Royal purple     | Arcane → cyan → magenta → solar → white mastery |
+
+Do **not** flatten rank colours to `primary` tints unless explicitly redesigning
+`packages/ui/theme/tokens.ts`.
 
 ## Typography
 
-- Headings: bold, `tracking-wide`, uppercase
-- Body: clean, adequate line height, warm white
-- Question numbers: extra large (`text-6xl`+), bold, centred, high contrast
-- Japanese characters: display at ~60% of the English label size alongside
+- Headings: bold, uppercase or wide tracking — **game menu** energy
+- Body: clean, warm white, generous line height
+- Question numbers: **huge** (`72px+`), bold, centre stage
+- Japanese (kanji): bold, can be **larger** on celebration screens — anime title card energy
+- Avoid wall-of-small-caps grey text on dark cards
 
-## Spacing & Layout
+## Spacing & layout
 
-- Base padding: `p-4` (16px)
-- Card radius: `rounded-lg`
-- Screen safe area: always use `SafeAreaView` or `useSafeAreaInsets`
-- Full-screen layouts preferred — no scroll on challenge screens
+- Base padding: `p-4`
+- Card radius: `rounded-xl` or `rounded-2xl` for softer, game-y panels
+- Always `SafeAreaView` / safe area insets
+- Challenge: question dominates; support UI stays compact
 
-## Component Patterns
+## Component patterns
 
-### Screen Layout
+### Ambient background (screens)
+
+Soft **coloured glow** behind content using path or rank colour at low opacity
+(e.g. 10–20%). Stops screens feeling like a void.
+
 ```tsx
-<SafeAreaView className="flex-1 bg-background">
-  <View className="flex-1 px-4 py-6">
-    {/* content */}
-  </View>
-</SafeAreaView>
+// Example: large blurred circle behind hero content
+<View style={{ position: 'absolute', width: 280, height: 280, borderRadius: 140,
+  backgroundColor: theme.primary, opacity: 0.12, top: -40, left: -60 }} />
 ```
 
-### Primary Button
+### Primary button
+
+- Fill: `rankColor` or `theme.primary`
+- Chunky: `py-4`, `rounded-xl`
+- Press: `scale(0.97)` + slight opacity dip
+- Optional: light top highlight (`borderTopColor: rgba(255,255,255,0.35)`)
+- **NativeWind on Pressable**: put 3D/bevel styles on inner `<View>`, not Pressable (see below)
+
+### Cards (Dojo rank list, home summary)
+
+- `surface` or `surface-bright` background
+- **Current rank**: bright border in rank colour + tinted fill (`rankColor + '20'`)
+- **Complete**: rank colour accents + check — use `<View>`, not disabled `Pressable`
+- **Locked**: dimmed but still **colourful** — show what they’re missing (no greyscale)
+
+### Question display
+
+- Numbers: 72px+, white or near-white
+- `×`: rank colour, 32px+
+- Answer box: compact, clear border in rank colour when active
+
+## Arcade symbology (no custom art)
+
+Identity comes from **Lucide icons + kanji + rank colours** — not bespoke SVG,
+mon crests, or emoji. All icon names live in `packages/ui/theme/tokens.ts`.
+
+### Path icons (difficulty presets)
+
+Each path has a distinct Lucide icon in `PRESETS[].icon`:
+
+| Preset   | Icon (Lucide) | Role on screen                          |
+|----------|---------------|-----------------------------------------|
+| Ashigaru | Footprints    | “First steps” — training path badge     |
+| Samurai  | Swords        | Standard warrior path                   |
+| Ronin    | Flame         | Wild / masterless energy                |
+| Shogun   | Crown         | Ultimate command path                   |
+
+Show path icon on **home** (current path), **Change Path** list, and **Dojo**
+header. Render inside a **circular medallion**: `theme.primary` border, tinted
+fill, icon at 24–32px.
+
+### Rank icons (weapon tiers)
+
+Each rank has `RANKS[].icon` + `RANKS[].japanese`. Use on **every** rank surface:
+
+| Rank | Weapon    | Icon (Lucide) | Japanese |
+|------|-----------|---------------|----------|
+| 1    | Bokken    | Flame         | 木刀     |
+| 2    | Tanto     | Shield        | 短刀     |
+| 3    | Wakizashi | Sword         | 脇差     |
+| 4    | Katana    | Swords        | 刀       |
+| 5    | Nodachi   | Crown         | 野太刀   |
+
+**Medallion pattern** (home badge, Dojo row, celebration hero):
+
+```tsx
+// Resolve icon: (LucideIcons as Record<string, LucideIcon>)[rank.icon]
+<View style={{
+  width: 48, height: 48, borderRadius: 24,
+  borderWidth: 2, borderColor: rankColor,
+  backgroundColor: rankColor + '22',
+  alignItems: 'center', justifyContent: 'center',
+}}>
+  <RankIcon size={28} color={rankColor} />
+</View>
 ```
-// Must use dynamic theme primary/primaryDim where applicable!
-bg-primary, rounded-lg, px-6 py-4
-active:scale-95 active:bg-primary-dim transition-transform
-text: text-background (dark), font-bold, uppercase, tracking-wider
-```
 
-### Ghost Button
-```
-// Must use dynamic theme primary/primaryDim for borders!
-border border-border, bg-transparent, rounded-lg, px-6 py-4
-active:bg-surface transition-colors
-text: text-text, font-bold, uppercase
-```
+- **Dojo list**: rank medallion left of name; kanji beside English name (not
+  hidden in muted footnote).
+- **Celebration**: medallion 64–80px; kanji **large** (title-card size).
+- **Challenge header**: small rank icon (20–24px) next to rank name.
+- **Status icons** (Lock, Check, ChevronRight): secondary — rank medallion is
+  the hero.
 
-### Card / Panel
-```
-bg-surface, rounded-lg, border border-border, p-4
-// Add subtle active states if interactive: active:bg-[#1a1a1a]
-```
+Resolve Lucide components dynamically from the string in tokens — same pattern
+as home screen today. No new icon packages.
 
-### Question Display
-```
-text-6xl font-bold text-text text-center — the multiplication question
-text-2xl text-text-muted text-center — operator symbols
-```
+## Animations
 
-## Weapon Rank System
+| Moment           | Feel                                              |
+|------------------|---------------------------------------------------|
+| Correct answer   | Slash or burst + green flash + scale pop (existing OK, can punch up saturation) |
+| Wrong answer     | Shake + red flash                                 |
+| Rank unlock      | **Big** — flash, scale, hold 1–2s, then Continue  |
+| Button press     | Quick scale                                       |
+| Screen transition| Fade or slide — **light ease-out OK** on celebration |
 
-Progress within each difficulty level. Display weapon name + Japanese:
+Use `useNativeDriver: true` for transform/opacity. Avoid long chained sequences
+that block shipping.
 
-| Rank | Weapon    | Japanese | Icon hint          |
-|------|-----------|----------|--------------------|
-| 1    | Bokken    | 木刀     | Wooden rod shape   |
-| 2    | Tanto     | 短刀     | Short dagger       |
-| 3    | Wakizashi | 脇差     | Medium blade       |
-| 4    | Katana    | 刀       | Curved long blade  |
-| 5    | Nodachi   | 野太刀   | Great sword        |
+**Do not** add new animation libraries for v1.
 
-- Each rank MUST use its own sub-theme color from `theme.ranks[rankIndex]` to create a visual progression.
-- Locked ranks: visible but dimmed (e.g. `opacity-70`), clearly showing the requirements so the player is motivated. Do NOT use greyscale.
-- Current rank: vibrant glowing borders using the rank's specific color, slightly tinted background.
-- Completed ranks: rank color checkmark, prominent but less visually demanding than the current rank.
+## Visual hierarchy — challenge
 
-## Difficulty Presets
+| Element          | Size / treatment                          |
+|------------------|-------------------------------------------|
+| Question a, b    | 72px+, dominant                           |
+| ×                | 32px+, rank colour                        |
+| Answer input     | 36–40px                                   |
+| Score (header)   | 24px+, rank colour, bold                  |
+| Rank name header | Centred, rank colour                      |
 
-| Preset   | Japanese meaning | Range  |
-|----------|-----------------|--------|
-| Ashigaru | Foot soldier    | 1–10   |
-| Samurai  | Warrior         | 1–20   |
-| Ronin    | Masterless      | 1–50   |
-| Shogun   | Supreme command | 1–100  |
+## NativeWind + Pressable (critical)
 
-Display preset name large, range small below in `text-muted`.
+NativeWind may strip dynamic styles on `<Pressable>`. For 3D buttons:
 
-## Animations — General
+1. `Pressable` handles hit area only
+2. Inner `<View>` gets background, borders, shadow/glow
+3. Disabled = lower opacity, **same shape** (not flat)
 
-- Correct answer: brief green flash on question container + scale up tick
-- Wrong answer: red flash + subtle shake animation
-- Rank unlock: full-screen dynamic theme burst, weapon reveals from centre
-- Screen transitions: fade or slide — never bounce/elastic (too playful)
-- Buttons/Keys: `active:scale-95` or background color shift for immediate tactile response
+## Dojo rank list (critical)
 
-## Visual Hierarchy — Challenge Screens
+Only **current** rank is `Pressable`. Complete and locked rows are `<View>`.
+Never `<Pressable disabled={true}>` — causes crashes. See `docs/DEBUGGING.md`.
 
-The question is king. Nothing competes with it. Follow this sizing hierarchy:
+## What NOT to do
 
-| Element | Minimum Size | Notes |
-|---------|-------------|-------|
-| Question numbers (a, b) | 72px+ (font-size) | The dominant element on screen — impossible to ignore |
-| Answer input display | 36–40px | Clear but secondary to question |
-| × operator symbol | 32–36px | Styled in rank color, not muted |
-| = ? | 24–28px | Text-muted, suggestive |
-| Question counter | 14px label, 18px number | Number in rank color, label in text-muted |
-| Score display (header) | 24–26px for count | Bold, rank-colored. Must be readable at a glance |
-| Header rank name | 14–15px | Truly centred (absolute overlay), tracked, uppercase, rank-colored |
+- No pure `#0A0A0A` empty screens without ambient colour
+- No “stealth mode” UI — if it’s important, make it **visible and coloured**
+- No disabled `Pressable` for non-tappable list rows
+- No hardcoded gold when rank colour exists
+- No new navigation/storage refactors during design-only passes
+- No emoji in UI (kanji + icons only)
+- No scope creep: design pass ≠ rewrite game logic
 
-The answer display box must be compact — just enough to wrap the number.
-Do NOT make it a large card. `paddingVertical: 10–12px`, `minWidth: 140px`.
+## Ship-first polish tiers
 
-### Rank Color Usage
+**Tier 1 (do before store):** ambient glow, brighter surfaces, rank-colour CTAs,
+**path + rank medallions on all core screens**, kanji visible on rank cards,
+celebration overlay punch-up, home + dojo card contrast.
 
-Each weapon rank within a difficulty theme has its own color defined in
-`difficultyThemes[preset].ranks[rankIndex]`. This rank-specific color **MUST**
-be used as the dominant accent throughout the challenge screen:
+**Tier 2 (nice later):** custom mon/SVG art, particles, sound, Lottie.
 
-- Submit button background
-- Progress bar fill
-- × operator symbol color
-- Question counter number
-- Score count in header
-- Header rank name
-- Slash animation color
+**Tier 3 (defer):** full art pass, illustrated backgrounds, character mascot.
 
-The base `theme.primary` should only appear in pressed/disabled fallback states.
-Never use a flat gold (#C9A84C) when a rank-specific color is available.
-
-## Advanced Styling & Layout Fixes
-
-### 3D Buttons & NativeWind Bugs
-NativeWind (v4/Tailwind) frequently strips or ignores dynamic inline styles on React Native `<Pressable>` components (e.g. `style={({ pressed }) => ({...})}`). 
-To build premium 3D buttons (like Submit):
-1. **Bypass NativeWind** for the styling: Wrap the inner content of the `Pressable` in a standard `<View>`. Apply all backgrounds, shadows, and dynamic borders directly to this inner `<View>`.
-2. **Always retain geometry**: Disabled states must NOT remove borders or shadows. A disabled button is just dim (`opacity: 0.35`), it is never flat. 
-3. **Bevels & Shadows**: Buttons must look premium. Use `borderTopWidth: 1.5` with a white semi-transparent color for a glass-morphic highlight, and `borderBottomWidth: 4` with a black semi-transparent color for a physical lip. Add a heavy glowing drop shadow (`shadowColor: rankColor`).
-
-### Optical Illusions in Layout
-When centring small text (like `= ?`) beneath massive text (like a `72px+` question), the massive text has invisible line-height padding below its baseline. If you use equal vertical margins on the `= ?`, it will look misaligned. You must use uneven margins (e.g., `marginTop: 4`, `marginBottom: 24`) to achieve *optical* vertical centring.
-
-## Animations — Combat Feel
-
-### Correct Answer: Sword Slash
-When a correct answer is submitted, a diagonal slash cuts across the question
-area — a thin white blade line (2px) with a wider rank-colored glow (10px)
-behind it. The slash scales outward from the centre (`scaleX` 0→1) at ~−28°,
-creating the impression of a blade cutting through. Duration: 200–300ms.
-Combined with a subtle scale pulse (1→1.1→1) on the answer display.
-
-### Wrong Answer: Shake
-The answer box shakes horizontally — 3 damped oscillations (±14→±10→±5→0px)
-over ~300ms. No slash. The red danger background provides the emotional weight.
-
-### Screen Transitions
-Fade only. Never bounce or elastic — too playful for this aesthetic.
-
-## What NOT to Do
-
-- No bright backgrounds — dark mode only
-- No hardcoded base gold (`#C9A84C`) when a dynamic theme is available!
-- No rounded avatars or cartoon characters
-- No emoji in UI (Japanese characters only for authenticity)
-- No pastel colours
-- No drop shadows (use borders instead)
-- No gradients except subtle dark-to-darker on background panels
+Prompt 11 targets **Tier 1 only**.

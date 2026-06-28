@@ -48,7 +48,8 @@ export const difficultyThemes = {
 export const weaponRanks = [
   { 
     id: 1, 
-    name: 'Bokken', 
+    name: 'Bokken',
+    japanese: '木刀',
     icon: 'Flame', 
     description: 'Wooden sword',
     testDescription: 'Foundational challenge with mixed difficulty.',
@@ -56,7 +57,8 @@ export const weaponRanks = [
   },
   { 
     id: 2, 
-    name: 'Tanto', 
+    name: 'Tanto',
+    japanese: '短刀',
     icon: 'Shield', 
     description: 'Dagger',
     testDescription: 'Increased difficulty with fewer easy questions.',
@@ -64,7 +66,8 @@ export const weaponRanks = [
   },
   { 
     id: 3, 
-    name: 'Wakizashi', 
+    name: 'Wakizashi',
+    japanese: '脇差',
     icon: 'Sword', 
     description: 'Short sword',
     testDescription: 'Moderate difficulty focus.',
@@ -72,7 +75,8 @@ export const weaponRanks = [
   },
   { 
     id: 4, 
-    name: 'Katana', 
+    name: 'Katana',
+    japanese: '刀',
     icon: 'Swords', 
     description: 'Sword',
     testDescription: 'Advanced difficulty only.',
@@ -80,7 +84,8 @@ export const weaponRanks = [
   },
   { 
     id: 5, 
-    name: 'Nodachi', 
+    name: 'Nodachi',
+    japanese: '野太刀',
     icon: 'Crown', 
     description: 'Great sword',
     testDescription: 'The ultimate test. Only the hardest questions.',
@@ -88,11 +93,12 @@ export const weaponRanks = [
   },
 ] as const
 
+/** Lucide icon name — resolve via lucide-react-native in app screens */
 export const difficultyPresets = [
-  { id: 'ashigaru', label: 'Ashigaru', max: 10 },
-  { id: 'samurai', label: 'Samurai', max: 20 },
-  { id: 'ronin', label: 'Ronin', max: 50 },
-  { id: 'shogun', label: 'Shogun', max: 100 },
+  { id: 'ashigaru', label: 'Ashigaru', max: 10, icon: 'Footprints' },
+  { id: 'samurai', label: 'Samurai', max: 20, icon: 'Swords' },
+  { id: 'ronin', label: 'Ronin', max: 50, icon: 'Flame' },
+  { id: 'shogun', label: 'Shogun', max: 100, icon: 'Crown' },
 ] as const
 
 export type DifficultyId = typeof difficultyPresets[number]['id']
