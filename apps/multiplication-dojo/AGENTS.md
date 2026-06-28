@@ -1,7 +1,8 @@
 ﻿# Multiplication Dojo — App Agent Rules
 
 First Daruma Dojo app. Gamified times tables for all ages with Japanese samurai
-theme. Read `../../AGENTS.md` and `../../DESIGN.md` first.
+theme. Read `../../AGENTS.md`, `../../DESIGN.md`, and **`../../docs/DEBUGGING.md`**
+before debugging crashes or changing navigation/storage architecture.
 
 ## App Identity
 
@@ -28,12 +29,16 @@ app/
 
 ## Expo Router
 
-Use standard APIs (`push`, `back`, `replace`). Do **not** add rules like
-“never use replace” — that was incorrect debug guidance.
+Use standard APIs (`push`, `back`, `replace`). Do **not** invent router rules
+during debugging (see `docs/DEBUGGING.md`).
 
-If you see `Couldn't find a navigation context`, check for **render errors in
-the screen being built** first. React Native often misattributes those to
-`useRouter()`.
+**Misleading errors:** `Couldn't find a navigation context` often means a **render
+crash** in the screen being opened — not a missing `NavigationContainer`. If
+Metro shows `[dojo] useRouter ok` before the error, the bug is **not** `useRouter()`.
+
+When debugging: compare with **`difficulty.tsx`** (storage write + `router.back()`
+on root stack, works). If rank writes work on home/dev-unlock but Dojo crashes,
+strip Dojo to header-only readout before changing MMKV or route structure.
 
 ## Rank list UI — required pattern (Dojo)
 
@@ -82,3 +87,5 @@ storage.set(`rank:${preset}:${rankId}`, status)
 - No backend calls — everything is local
 - No skip rank in production UI
 - Never use disabled `Pressable` for non-interactive rank rows in Dojo
+- Never refactor routes/storage/imports as a first response to a redbox — follow
+  `docs/DEBUGGING.md`
