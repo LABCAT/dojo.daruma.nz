@@ -774,8 +774,8 @@ nervous beginner warming up and the adult grinding mental math before bed.
 
 ### Read First & Deep Research
 Read `AGENTS.md` and `DESIGN.md` before starting.
-**CRITICAL AI INSTRUCTION:** Do not write code blindly. Deeply research the `usePractice` hook and `challenge.tsx` to ensure you understand how auto-advancing works. 
-**ROUTER SAFETY:** Never use `router.replace()` or `<Link replace>` to navigate back to the root of the current stack. The `replace` action unmounts the `NavigationContainer` and causes severe crashes. ALWAYS use `router.navigate('/(path)')` which safely pops the screens off the stack.
+Research the `usePractice` hook and `challenge.tsx` for auto-advance behaviour.
+Use normal Expo Router APIs (`push`, `back`, `replace`) — see `apps/multiplication-dojo/AGENTS.md`.
 
 ### Prerequisites
 - Prompt 08 complete and verified on device
@@ -852,8 +852,8 @@ A wrong answer should sting.
 
 ### Read First & Deep Research
 Read `AGENTS.md` and `DESIGN.md` before starting.
-**CRITICAL AI INSTRUCTION:** Thoroughly research the existing `challenge.tsx` and `index.tsx` files. Understand the exact mounting and state lifecycle before injecting animations. Do NOT guess the timing.
-**ROUTER SAFETY:** Never use `router.replace()` to navigate back to the root of the current stack. The `replace` action unmounts the `NavigationContainer` and causes severe crashes. ALWAYS use `router.navigate('/(path)')` which safely pops the screens off the stack.
+Research existing `challenge.tsx` and home screen before injecting animations.
+Use normal Expo Router APIs — see `apps/multiplication-dojo/AGENTS.md`.
 
 ### Prerequisites
 - Prompt 09 complete and verified on device
@@ -942,7 +942,7 @@ details that separate a professional product from a prototype.
 
 ### Read First & Deep Research
 Read `AGENTS.md` before starting.
-**CRITICAL AI INSTRUCTION:** This is the final polish. Before writing a line of code, execute a deep audit of the codebase to identify any fragile `router.replace()` calls navigating back to stack roots, and replace them with `router.navigate()`. We must not ship with `NavigationContainer` crash risks.
+Follow rank-list and NativeWind rules in `apps/multiplication-dojo/AGENTS.md`.
 
 ### Prerequisites
 - Prompt 10 complete and verified on device
