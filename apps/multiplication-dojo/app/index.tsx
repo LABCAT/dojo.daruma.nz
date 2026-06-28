@@ -137,17 +137,7 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
 
-          {__DEV__ && (
-            <Pressable
-              onPress={() => router.push('/dev-unlock-rank')}
-              className="border rounded-lg py-5 items-center justify-center"
-              style={{ borderColor: '#E53535', borderStyle: 'dashed' }}
-            >
-              <Text className="font-bold text-lg tracking-widest uppercase" style={{ color: '#E53535' }}>
-                Unlock Rank
-              </Text>
-            </Pressable>
-          )}
+
 
 
         </View>

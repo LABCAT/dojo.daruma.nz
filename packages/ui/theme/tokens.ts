@@ -16,31 +16,31 @@ export const colors = {
 export const difficultyThemes = {
   ashigaru: {
     name: 'Ashigaru',
-    primary: '#B87333', // Copper / Bronze base
-    primaryDim: '#8B5A2B',
+    primary: '#FF9933', // Bright Copper
+    primaryDim: '#CC6600',
     // Wood -> Slate/Iron -> Bronze -> Silver -> Gold
-    ranks: ['#8B5A2B', '#708090', '#CD7F32', '#C0C0C0', '#FFD700'], 
+    ranks: ['#FFA040', '#99CCFF', '#FFB060', '#E0E0E0', '#FFE033'], 
   },
   samurai: {
     name: 'Samurai',
-    primary: '#4682B4', // Steel Blue base
-    primaryDim: '#315C80',
+    primary: '#33AAFF', // Bright Blue
+    primaryDim: '#0066CC',
     // Cadet Blue -> Dodger Blue -> Spring Green -> Purple -> Pink
-    ranks: ['#5F9EA0', '#1E90FF', '#00FA9A', '#9370DB', '#FF1493'], 
+    ranks: ['#00FFCC', '#33AAFF', '#00FF66', '#B066FF', '#FF33AA'], 
   },
   ronin: {
     name: 'Ronin',
-    primary: '#DC143C', // Crimson / Red base
-    primaryDim: '#8B0000',
-    // Indian Red -> Dark Orange -> Gold -> Crimson -> Blood Red
-    ranks: ['#CD5C5C', '#FF8C00', '#FFD700', '#DC143C', '#8B0000'], 
+    primary: '#FF5E36', // Sunset Red-Orange base
+    primaryDim: '#C23A1B',
+    // Sunset Orange -> Golden Amber -> Scarlet Crimson -> Deep Amethyst/Purple -> Obsidian Charcoal
+    ranks: ['#FF5E36', '#FFAE19', '#E62B4C', '#8A1C7C', '#444444'], 
   },
   shogun: {
     name: 'Shogun',
-    primary: '#9370DB', // Purple / Gold base
-    primaryDim: '#4B0082',
+    primary: '#AA00FF', // Purple Glow
+    primaryDim: '#6600CC',
     // Blue Violet -> Cyan Lightning -> Magenta -> Orange Red -> Pure White Mastery
-    ranks: ['#8A2BE2', '#00FFFF', '#FF00FF', '#FF4500', '#FFFFFF'], 
+    ranks: ['#AA00FF', '#00FFFF', '#FF00FF', '#FF5500', '#FFFFFF'], 
   },
 } as const
 

@@ -421,7 +421,7 @@ export default function ChallengeScreen() {
             <Text style={{ fontSize: 20, lineHeight: 24, fontWeight: '900', color: safeRankColor, includeFontPadding: false }}>
               {challenge.correctCount}
             </Text>
-            <Text style={{ fontSize: 13, lineHeight: 18, fontWeight: '700', color: '#8A8580', marginLeft: 4, includeFontPadding: false }}>
+            <Text style={{ fontSize: 13, lineHeight: 18, fontWeight: '700', color: '#F0EDE8', marginLeft: 4, includeFontPadding: false }}>
               / {challenge.totalQuestions}
             </Text>
           </View>

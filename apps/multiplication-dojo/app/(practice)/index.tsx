@@ -250,51 +250,18 @@ export default function PracticeScreen() {
   // ═══════════════════════════════════════════════════════════════════════
   if (phase === 'select') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#0F0F18' }}>
-        {/* Ambient glow */}
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }} pointerEvents="none">
-          <View style={{ position: 'absolute', top: -60, left: -60, width: 280, height: 280, borderRadius: 140, backgroundColor: theme.primary, opacity: 0.12 }} />
-          <View style={{ position: 'absolute', bottom: -80, right: -60, width: 320, height: 320, borderRadius: 160, backgroundColor: theme.primary, opacity: 0.08 }} />
-        </View>
-
-        <View style={{ flex: 1 }}>
+      <SafeAreaView className="flex-1 bg-background">
+        <View className="flex-1">
           {/* Header */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              height: 56,
-              paddingHorizontal: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: 'rgba(255,255,255,0.05)',
-            }}
-          >
+          <View className="flex-row items-center h-14 px-4 border-b border-border">
             <Pressable
               onPress={handleBack}
-              style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'flex-start', zIndex: 1 }}
+              className="w-11 h-11 justify-center items-start z-10"
             >
               <ChevronLeft size={24} color="#F0EDE8" />
             </Pressable>
 
             <View style={{ flex: 1 }} />
-
-            {/* Path badge */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 1 }}>
-              <View
-                style={{
-                  width: 32, height: 32, borderRadius: 16,
-                  borderWidth: 2, borderColor: theme.primary,
-                  backgroundColor: theme.primary + '22',
-                  alignItems: 'center', justifyContent: 'center',
-                  marginRight: 8,
-                }}
-              >
-                <PathIcon size={18} color={theme.primary} />
-              </View>
-              <Text style={{ fontSize: 13, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase', color: theme.primary }}>
-                {presetData.label}
-              </Text>
-            </View>
 
             {/* Centered title */}
             <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>

@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Pressable, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect, useRouter } from 'expo-router'
-import { ArrowLeft, Check, ChevronRight, Lock } from 'lucide-react-native'
+import { ArrowLeft, Check, Lock, ChevronRight } from 'lucide-react-native'
+import * as LucideIcons from 'lucide-react-native'
+import { Text } from '@daruma/ui'
 import {
   RANKS,
   getActiveDifficulty,
@@ -66,34 +68,40 @@ export default function DojoIndex() {
             const isComplete = status === 'complete'
             const isLocked = status === 'locked'
             const rankColor = getRankColor(activePreset, rank.id)
-            const tintedBackground = rankColor + '26'
 
+            // Invert the active rank card (rankColor background, white text, black icons/numbers)
             const rowStyle = {
-              backgroundColor: isCurrent || isComplete ? tintedBackground : '#1A1A1A',
-              borderColor: isCurrent ? rankColor : isComplete ? rankColor + '40' : rankColor + '30',
-              borderWidth: isCurrent ? 2 : 1,
-              borderRadius: 8,
+              backgroundColor: isCurrent ? rankColor : '#141414',
+              borderColor: rankColor,
+              borderWidth: isCurrent ? 8 : isComplete ? 5 : 3,
+              borderRadius: 16, // Increased radius to offset thick borders
               padding: 16,
             }
+            
+            // Safely get the icon component from lucide
+            const RankIcon = (LucideIcons as any)[rank.icon] || LucideIcons.Sword
 
             const rowContent = (
               <>
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-row items-center gap-3">
+                    <RankIcon size={24} color={isCurrent ? '#FFFFFF' : rankColor} />
                     <Text
                       className="text-2xl font-bold"
-                      style={{ color: isLocked ? rankColor + '80' : rankColor }}
+                      style={{ color: isCurrent ? '#FFFFFF' : rankColor }}
                     >
                       0{rank.id}
                     </Text>
                     <View className="flex-row items-baseline gap-2">
                       <Text
-                        className={`font-bold uppercase tracking-wider text-lg ${isLocked ? 'text-[#C4C0BA]' : 'text-text'}`}
+                        className={`font-bold uppercase tracking-wider text-lg ${isLocked ? 'text-[#8A8580]' : 'text-text'}`}
+                        style={isCurrent ? { color: '#000000' } : undefined}
                       >
                         {rank.name}
                       </Text>
                       <Text
-                        className={`text-sm font-medium ${isLocked ? 'text-[#8A8580]' : 'text-text-muted'}`}
+                        className={`text-sm font-medium ${isLocked ? 'text-[#6A6560]' : 'text-text-muted'}`}
+                        style={isCurrent ? { color: '#000000', opacity: 0.7 } : undefined}
                       >
                         {JAPANESE_NAMES[rank.id] || ''}
                       </Text>
@@ -102,18 +110,22 @@ export default function DojoIndex() {
 
                   <View className="ml-2">
                     {isComplete && <Check size={24} color={rankColor} />}
-                    {isCurrent && <ChevronRight size={24} color={rankColor} />}
-                    {isLocked && <Lock size={20} color={rankColor + '60'} />}
+                    {isCurrent && <ChevronRight size={24} color="#FFFFFF" />}
+                    {isLocked && <Lock size={20} color={rankColor} />}
                   </View>
                 </View>
 
                 <View style={{ paddingLeft: 44 }}>
-                  <Text className={`text-sm mb-1 ${isLocked ? 'text-[#A39E98]' : 'text-text'}`}>
+                  <Text 
+                    className={`text-sm mb-1 ${isLocked ? 'text-[#A39E98]' : 'text-text'}`}
+                    style={isCurrent ? { color: '#000000' } : undefined}
+                  >
                     {/* @ts-ignore */}
                     {rank.testDescription}
                   </Text>
                   <Text
-                    className={`text-xs font-bold ${isComplete ? 'text-success-bright' : isCurrent ? 'text-text' : 'text-[#8A8580]'}`}
+                    className={`text-xs font-bold ${isComplete ? 'text-success-bright' : 'text-[#8A8580]'}`}
+                    style={isCurrent ? { color: '#000000', fontWeight: '900' } : undefined}
                   >
                     {/* @ts-ignore */}
                     {isComplete ? 'COMPLETED' : rank.passRequirement}
@@ -132,12 +144,21 @@ export default function DojoIndex() {
                       params: { preset: activePreset, rankId: String(rank.id) },
                     })
                   }
-                  style={({ pressed }) => [
-                    rowStyle,
-                    pressed ? { opacity: 0.95, transform: [{ scale: 0.98 }] } : undefined,
-                  ]}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.9 : 1,
+                    borderRadius: 16,
+                    transform: [{ scale: 1.04 }],
+                    // Standard shadow properties on the outer container
+                    shadowColor: rankColor,
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: 0.9,
+                    shadowRadius: 12,
+                    elevation: 8,
+                  })}
                 >
-                  {rowContent}
+                  <View style={rowStyle}>
+                    {rowContent}
+                  </View>
                 </Pressable>
               )
             }

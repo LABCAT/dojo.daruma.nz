@@ -26,17 +26,25 @@ const Key = ({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={`flex-1 h-16 m-1 items-center justify-center border rounded-md ${
-        disabled ? 'opacity-40' : ''
-      }`}
-      style={({ pressed }) => ({
-        borderColor: isAction ? theme.primary : theme.primaryDim,
-        backgroundColor: pressed && !disabled ? '#2A2A2A' : '#141414', // active: border color, default: surface
-      })}
+      className={`flex-1 h-16 m-1 ${disabled ? 'opacity-40' : ''}`}
     >
-      <RNText className="text-3xl font-bold" style={{ color: isAction ? theme.primary : '#F0EDE8' }}>
-        {label}
-      </RNText>
+      {({ pressed }) => (
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 6,
+            borderWidth: 2,
+            borderColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: pressed && !disabled ? '#2A2A2A' : '#141414',
+          }}
+        >
+          <RNText className="text-3xl font-bold" style={{ color: isAction ? theme.primary : '#F0EDE8' }}>
+            {label}
+          </RNText>
+        </View>
+      )}
     </Pressable>
   )
 }
