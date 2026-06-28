@@ -3,12 +3,12 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { ArrowLeft, Check, ChevronRight, Lock } from 'lucide-react-native'
-import { 
-  RANKS, 
-  getActiveDifficulty, 
-  getAllRankStatuses, 
+import {
+  RANKS,
+  getActiveDifficulty,
+  getAllRankStatuses,
   getDifficultyTheme,
-  getRankColor
+  getRankColor,
 } from '@daruma/ui'
 import type { PresetId, RankStatus, RankId } from '@daruma/ui'
 
@@ -36,7 +36,7 @@ export default function DojoIndex() {
       const preset = getActiveDifficulty()
       setActivePreset(preset)
       setStatuses(getAllRankStatuses(preset))
-    }, [])
+    }, []),
   )
 
   const theme = getDifficultyTheme(activePreset)
@@ -44,9 +44,8 @@ export default function DojoIndex() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 px-4 py-6">
-        {/* Header */}
         <View className="flex-row items-center mb-6">
-          <Pressable 
+          <Pressable
             onPress={() => router.back()}
             className="w-12 h-12 justify-center items-center -ml-2"
           >
@@ -60,7 +59,6 @@ export default function DojoIndex() {
           </View>
         </View>
 
-        {/* Rank List */}
         <ScrollView className="flex-1" contentContainerStyle={{ gap: 16, paddingBottom: 24 }}>
           {RANKS.map((rank) => {
             const status = statuses[rank.id as RankId]
@@ -68,51 +66,40 @@ export default function DojoIndex() {
             const isComplete = status === 'complete'
             const isLocked = status === 'locked'
             const rankColor = getRankColor(activePreset, rank.id)
-
-            // Add 15% opacity to the hex color for a glowing background tint
             const tintedBackground = rankColor + '26'
 
-            return (
-              <Pressable
-                key={rank.id}
-                disabled={!isCurrent}
-                onPress={() => {
-                  if (isCurrent) {
-                    // MAIN BRANCH NAVIGATION: use navigate
-                    router.navigate({
-                      pathname: '/(dojo)/challenge',
-                      params: { preset: activePreset, rankId: String(rank.id) }
-                    })
-                  }
-                }}
-                className={`
-                  rounded-lg p-4
-                  ${isCurrent ? 'border-2 active:scale-[0.98]' : 'border'}
-                `}
-                style={{
-                  backgroundColor: isCurrent || isComplete ? tintedBackground : '#1A1A1A',
-                  borderColor: isCurrent ? rankColor : (isComplete ? rankColor + '40' : rankColor + '30')
-                }}
-              >
+            const rowStyle = {
+              backgroundColor: isCurrent || isComplete ? tintedBackground : '#1A1A1A',
+              borderColor: isCurrent ? rankColor : isComplete ? rankColor + '40' : rankColor + '30',
+              borderWidth: isCurrent ? 2 : 1,
+              borderRadius: 8,
+              padding: 16,
+            }
+
+            const rowContent = (
+              <>
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-row items-center gap-3">
-                    <Text 
+                    <Text
                       className="text-2xl font-bold"
                       style={{ color: isLocked ? rankColor + '80' : rankColor }}
                     >
                       0{rank.id}
                     </Text>
                     <View className="flex-row items-baseline gap-2">
-                      <Text className={`font-bold uppercase tracking-wider text-lg ${isLocked ? 'text-[#C4C0BA]' : 'text-text'}`}>
+                      <Text
+                        className={`font-bold uppercase tracking-wider text-lg ${isLocked ? 'text-[#C4C0BA]' : 'text-text'}`}
+                      >
                         {rank.name}
                       </Text>
-                      <Text className={`text-sm font-medium ${isLocked ? 'text-[#8A8580]' : 'text-textMuted'}`}>
+                      <Text
+                        className={`text-sm font-medium ${isLocked ? 'text-[#8A8580]' : 'text-text-muted'}`}
+                      >
                         {JAPANESE_NAMES[rank.id] || ''}
                       </Text>
                     </View>
                   </View>
 
-                  {/* Status Indicator */}
                   <View className="ml-2">
                     {isComplete && <Check size={24} color={rankColor} />}
                     {isCurrent && <ChevronRight size={24} color={rankColor} />}
@@ -120,18 +107,45 @@ export default function DojoIndex() {
                   </View>
                 </View>
 
-                {/* Description & Requirements */}
-                <View className="pl-[2.75rem]">
+                <View style={{ paddingLeft: 44 }}>
                   <Text className={`text-sm mb-1 ${isLocked ? 'text-[#A39E98]' : 'text-text'}`}>
-                    {/* @ts-ignore - property exists dynamically now */}
+                    {/* @ts-ignore */}
                     {rank.testDescription}
                   </Text>
-                  <Text className={`text-xs font-bold ${isComplete ? 'text-successBright' : (isCurrent ? 'text-text' : 'text-[#8A8580]')}`}>
-                    {/* @ts-ignore - property exists dynamically now */}
+                  <Text
+                    className={`text-xs font-bold ${isComplete ? 'text-success-bright' : isCurrent ? 'text-text' : 'text-[#8A8580]'}`}
+                  >
+                    {/* @ts-ignore */}
                     {isComplete ? 'COMPLETED' : rank.passRequirement}
                   </Text>
                 </View>
-              </Pressable>
+              </>
+            )
+
+            if (isCurrent) {
+              return (
+                <Pressable
+                  key={rank.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(dojo)/challenge',
+                      params: { preset: activePreset, rankId: String(rank.id) },
+                    })
+                  }
+                  style={({ pressed }) => [
+                    rowStyle,
+                    pressed ? { opacity: 0.95, transform: [{ scale: 0.98 }] } : undefined,
+                  ]}
+                >
+                  {rowContent}
+                </Pressable>
+              )
+            }
+
+            return (
+              <View key={rank.id} style={rowStyle}>
+                {rowContent}
+              </View>
             )
           })}
         </ScrollView>
