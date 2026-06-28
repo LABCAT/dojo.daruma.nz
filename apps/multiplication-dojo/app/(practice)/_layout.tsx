@@ -5,7 +5,7 @@ export default function PracticeLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#0A0A0A' },
+        contentStyle: { backgroundColor: '#0F0F18' },
       }}
     />
   )

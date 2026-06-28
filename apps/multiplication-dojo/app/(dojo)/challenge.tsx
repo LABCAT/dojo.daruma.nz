@@ -602,7 +602,7 @@ export default function ChallengeScreen() {
         </View>
 
         {/* ── NumberPad + Submit ───────────────────────────────────────── */}
-        <View style={{ width: '100%', alignItems: 'center', paddingBottom: 48, paddingHorizontal: 16 }}>
+        <View style={{ width: '100%', alignItems: 'center', paddingBottom: 28, paddingTop: 40, paddingHorizontal: 16 }}>
           <View style={{ width: '100%', maxWidth: 320, alignItems: 'center' }}>
             
             <NumberPad
@@ -618,9 +618,9 @@ export default function ChallengeScreen() {
               {({ pressed }) => (
                 <View
                   style={{
-                    width: 220, // Smaller, sleeker width
-                    paddingVertical: 14, // Compact height
-                    marginTop: 24, // Clean space from number pad
+                    width: 220,
+                    paddingVertical: 14,
+                    marginTop: 14,
                     borderRadius: 16, // Modern rounded rectangle
                     alignItems: 'center',
                     justifyContent: 'center',
