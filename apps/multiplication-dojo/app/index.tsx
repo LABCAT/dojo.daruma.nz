@@ -118,6 +118,7 @@ export default function HomeScreen() {
         {/* ── CTA Buttons ────────────────────────────────────────────────── */}
         <View className="gap-3 mt-8">
           <Pressable
+            testID="home-enter-dojo"
             onPress={() => router.push('/(dojo)')}
             className="rounded-lg py-5 items-center justify-center"
             style={{ backgroundColor: theme.primary }}
@@ -136,16 +137,17 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
 
-          {/* TODO: TEMPORARY — remove after testing challenge screen */}
-          <Pressable
-            onPress={() => router.push('/(dojo)/challenge?preset=ashigaru&rankId=1')}
-            className="border rounded-lg py-5 items-center justify-center"
-            style={{ borderColor: '#E53535', borderStyle: 'dashed' }}
-          >
-            <Text className="font-bold text-lg tracking-widest uppercase" style={{ color: '#E53535' }}>
-              Test Challenge
-            </Text>
-          </Pressable>
+          {__DEV__ && (
+            <Pressable
+              onPress={() => router.push('/dev-unlock-rank')}
+              className="border rounded-lg py-5 items-center justify-center"
+              style={{ borderColor: '#E53535', borderStyle: 'dashed' }}
+            >
+              <Text className="font-bold text-lg tracking-widest uppercase" style={{ color: '#E53535' }}>
+                Unlock Rank
+              </Text>
+            </Pressable>
+          )}
 
 
         </View>

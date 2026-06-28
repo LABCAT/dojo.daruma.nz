@@ -15,10 +15,12 @@ import {
   RANKS,
   PRESETS,
   getDifficultyTheme,
+  advanceRank,
 } from '@daruma/ui'
 import type { PresetId, RankId } from '@daruma/ui'
 import { Text } from '@daruma/ui'
 import { ChevronLeft } from 'lucide-react-native'
+import { RankCelebrationOverlay } from '../../components/RankCelebrationOverlay'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -61,6 +63,7 @@ export default function ChallengeScreen() {
 
   const challenge = useChallenge(safePreset, safeRankId)
   const [input, setInput] = useState('')
+  const [showCelebration, setShowCelebration] = useState(false)
 
   const theme = getDifficultyTheme(safePreset)
   const rank = RANKS.find((r) => r.id === safeRankId) ?? RANKS[0]
@@ -72,6 +75,7 @@ export default function ChallengeScreen() {
   const slashOpacity = useRef(new Animated.Value(0)).current
   const shakeAnim = useRef(new Animated.Value(0)).current
   const answerPulse = useRef(new Animated.Value(1)).current
+  const hasAdvancedRef = useRef(false)
 
   // ── Start challenge on mount ───────────────────────────────────────────
   useEffect(() => {
@@ -79,18 +83,17 @@ export default function ChallengeScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Navigate on pass ───────────────────────────────────────────────────
   useEffect(() => {
-    if (challenge.status === 'passed') {
-      router.replace({
-        pathname: '/(dojo)/rank-unlock',
-        params: {
-          preset: safePreset,
-          completedRankId: String(safeRankId),
-        },
-      })
-    }
-  }, [challenge.status, router, safePreset, safeRankId])
+    if (challenge.status !== 'passed') return
+    if (hasAdvancedRef.current) return
+    hasAdvancedRef.current = true
+    advanceRank(safePreset, safeRankId)
+    setShowCelebration(true)
+  }, [challenge.status, safePreset, safeRankId])
+
+  const handleCelebrationContinue = useCallback(() => {
+    router.replace('/(dojo)')
+  }, [router])
 
   // ── Reset input when auto-advancing ────────────────────────────────────
   useEffect(() => {
@@ -659,6 +662,13 @@ export default function ChallengeScreen() {
           </View>
         </View>
       </View>
+      {showCelebration && (
+        <RankCelebrationOverlay
+          preset={safePreset}
+          completedRankId={safeRankId}
+          onContinue={handleCelebrationContinue}
+        />
+      )}
     </SafeAreaView>
   )
 }

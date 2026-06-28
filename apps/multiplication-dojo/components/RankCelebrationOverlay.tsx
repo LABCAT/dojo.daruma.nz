@@ -1,16 +1,15 @@
 import React, { useEffect, useRef } from 'react'
-import { View, Text, Pressable, Animated, Easing, Dimensions } from 'react-native'
-import { useRouter, useLocalSearchParams } from 'expo-router'
+import { View, Text, Pressable, Animated, Easing } from 'react-native'
 import { RANKS, getDifficultyTheme } from '@daruma/ui'
 import type { PresetId, RankId } from '@daruma/ui'
 import { Flame, Shield, Sword, Swords, Crown } from 'lucide-react-native'
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, typeof Flame> = {
   Flame,
   Shield,
   Sword,
   Swords,
-  Crown
+  Crown,
 }
 
 const KANJI_MAP: Record<number, string> = {
@@ -21,25 +20,25 @@ const KANJI_MAP: Record<number, string> = {
   5: '野太刀',
 }
 
-export default function RankUnlock() {
-  const router = useRouter()
-  const params = useLocalSearchParams<{ preset: string; completedRankId: string }>()
+interface RankCelebrationOverlayProps {
+  preset: PresetId
+  completedRankId: RankId
+  onContinue: () => void
+}
 
-  // 1. Process unlock data on first mount
-  const preset = (params.preset as PresetId) || 'ashigaru'
-  const completedId = parseInt(params.completedRankId || '1', 10) as RankId
-  
-  // Calculate next rank directly to show it instantly
-  const nextRankId = (completedId >= 5 ? 5 : completedId + 1) as RankId
-  const isMastered = completedId === 5
+export function RankCelebrationOverlay({
+  preset,
+  completedRankId,
+  onContinue,
+}: RankCelebrationOverlayProps) {
+  const nextRankId = (completedRankId >= 5 ? 5 : completedRankId + 1) as RankId
+  const isMastered = completedRankId === 5
 
-  // Lookup visuals for the NEXT rank (or current if mastered)
   const theme = getDifficultyTheme(preset)
-  const rank = RANKS.find(r => r.id === nextRankId) || RANKS[0]
+  const rank = RANKS.find((r) => r.id === nextRankId) || RANKS[0]
   const rankColor = theme.ranks[nextRankId - 1] || theme.primary
-  const IconComponent = ICON_MAP[rank.icon] || Flame
+  const IconComponent = ICON_MAP[rank.icon as keyof typeof ICON_MAP] || Flame
 
-  // 3. Animations
   const flashAnim = useRef(new Animated.Value(0)).current
   const scaleAnim = useRef(new Animated.Value(0)).current
   const textOpacity = useRef(new Animated.Value(0)).current
@@ -48,16 +47,12 @@ export default function RankUnlock() {
   useEffect(() => {
     Animated.sequence([
       Animated.delay(100),
-      
-      // Flash the background
       Animated.timing(flashAnim, {
         toValue: 1,
         duration: 150,
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
-      
-      // Heavy Haptic + BOOM scale up
       Animated.parallel([
         Animated.timing(flashAnim, {
           toValue: 0,
@@ -75,52 +70,62 @@ export default function RankUnlock() {
           toValue: 1,
           duration: 500,
           useNativeDriver: true,
-        })
+        }),
       ]),
-      
-      // Wait to bask
       Animated.delay(1000),
-      
-      // Show continue button
       Animated.timing(btnOpacity, {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
-      })
+      }),
     ]).start()
-
-  }, [])
+  }, [flashAnim, scaleAnim, textOpacity, btnOpacity])
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center' }}>
-      
-      {/* Background Flash */}
-      <Animated.View 
+    <View
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#0A0A0A',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 100,
+      }}
+    >
+      <Animated.View
         style={{
           position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           backgroundColor: rankColor,
           opacity: flashAnim.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 0.4]
-          })
+            outputRange: [0, 0.4],
+          }),
         }}
       />
 
       <Animated.View style={{ alignItems: 'center', opacity: textOpacity, marginBottom: 50 }}>
-        <Text style={{ color: rankColor, fontSize: 18, fontWeight: '900', letterSpacing: 8, textTransform: 'uppercase' }}>
+        <Text
+          style={{
+            color: rankColor,
+            fontSize: 18,
+            fontWeight: '900',
+            letterSpacing: 8,
+            textTransform: 'uppercase',
+          }}
+        >
           {isMastered ? 'DOJO MASTERED' : 'RANK UNLOCKED'}
         </Text>
       </Animated.View>
 
-      {/* The Reveal */}
-      <Animated.View 
-        style={{ 
-          alignItems: 'center',
-          transform: [{ scale: scaleAnim }]
-        }}
-      >
-        <View 
+      <Animated.View style={{ alignItems: 'center', transform: [{ scale: scaleAnim }] }}>
+        <View
           style={{
             width: 160,
             height: 160,
@@ -131,11 +136,6 @@ export default function RankUnlock() {
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 32,
-            shadowColor: rankColor,
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.6,
-            shadowRadius: 30,
-            elevation: 10,
           }}
         >
           <IconComponent size={80} color={rankColor} />
@@ -144,22 +144,35 @@ export default function RankUnlock() {
         <Text style={{ fontSize: 56, fontWeight: '900', color: '#F0EDE8', marginBottom: 4 }}>
           {KANJI_MAP[nextRankId]}
         </Text>
-        <Text style={{ fontSize: 28, fontWeight: '800', color: rankColor, letterSpacing: 6, textTransform: 'uppercase', marginBottom: 8 }}>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: '800',
+            color: rankColor,
+            letterSpacing: 6,
+            textTransform: 'uppercase',
+            marginBottom: 8,
+          }}
+        >
           {rank.name}
         </Text>
-        <Text style={{ fontSize: 16, fontWeight: '600', color: '#8A8580', textTransform: 'uppercase', letterSpacing: 2 }}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '600',
+            color: '#8A8580',
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+          }}
+        >
           {rank.description}
         </Text>
       </Animated.View>
 
-      {/* Continue Button */}
-      <Animated.View style={{ position: 'absolute', bottom: 64, opacity: btnOpacity, width: '100%', alignItems: 'center' }}>
-        <Pressable
-          onPress={() => {
-            // MAIN BRANCH NAVIGATION: use navigate
-            router.navigate('/(dojo)')
-          }}
-        >
+      <Animated.View
+        style={{ position: 'absolute', bottom: 64, opacity: btnOpacity, width: '100%', alignItems: 'center' }}
+      >
+        <Pressable testID="rank-unlock-continue" onPress={onContinue}>
           {({ pressed }) => (
             <View
               style={{
@@ -169,14 +182,17 @@ export default function RankUnlock() {
                 alignItems: 'center',
                 backgroundColor: rankColor,
                 opacity: pressed ? 0.9 : 1,
-                borderTopWidth: 1.5,
-                borderTopColor: 'rgba(255,255,255,0.4)',
-                borderBottomWidth: pressed ? 0 : 4,
-                borderBottomColor: 'rgba(0,0,0,0.35)',
-                transform: [{ translateY: pressed ? 4 : 0 }]
               }}
             >
-              <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 16, letterSpacing: 3, textTransform: 'uppercase' }}>
+              <Text
+                style={{
+                  color: '#FFFFFF',
+                  fontWeight: '900',
+                  fontSize: 16,
+                  letterSpacing: 3,
+                  textTransform: 'uppercase',
+                }}
+              >
                 Continue
               </Text>
             </View>

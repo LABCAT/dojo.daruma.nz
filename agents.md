@@ -48,6 +48,20 @@ pnpm typecheck                                 # turbo typecheck all
 - Bundle IDs: `nz.daruma.dojo.<appname>` (e.g. `nz.daruma.dojo.multiplicationdojo`)
 - Always aim to use the latest versions of all tech that is compatible with Expo Go
 
+## Debugging runtime bugs
+
+Read **`docs/DEBUGGING.md`** before refactoring navigation, storage, or monorepo
+layout in response to Expo / React Native redbox errors. Summary:
+
+1. **Trust symptoms over error text** — "navigation context" may mean a render crash.
+2. **Isolate layers** — prove storage on a working screen pattern before touching router.
+3. **Strip UI** on the crashing screen to confirm the bug is in JSX, not hooks.
+4. **Compare with a working screen** in the same app (e.g. `difficulty.tsx` vs rank unlock).
+5. **Stop guessing** — one hypothesis, one test, then decide. No fake router rules.
+
+React Native list rule: **never use `Pressable disabled` for non-interactive rows**
+— use `View`. See `apps/multiplication-dojo/AGENTS.md`.
+
 ## Adding a New App
 
 1. `cd apps && npx create-expo-app <name> --template blank-typescript`
